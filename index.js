@@ -4,7 +4,7 @@ const express = require('express');
 const app = express();
 
 // 建立一個不易產生衝突的 port 用來測試
-const port = 5001;
+// const port = 5001;
 
 // 如何處理不同的 request，參數分別為 url 和要執行的 function
 app.get('/', (req, res) => {
