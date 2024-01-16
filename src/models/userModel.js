@@ -3,7 +3,8 @@ const { MongoClient } = require('mongodb')
 const dotenv = require('dotenv')
 dotenv.config({ path: '.env.local' })
 
-const url = process.env.MONGODB_URI
+const url = 'mongodb://mongodb.zeabur.internal:27017';
+
 
 let db
 
