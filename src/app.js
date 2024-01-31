@@ -3,6 +3,8 @@ dotenv.config({ path: ".env.local" });
 const path = require("path");
 const cors = require("cors");
 const corsOptions = require("./configs/corsOptions");
+const cookieParser = require("cookie-parser");
+const credentials = require("./middleware/credentials");
 const express = require("express");
 const mongoose = require("mongoose");
 const connectDB = require("./configs/dbConn");
@@ -14,19 +16,26 @@ const passport = require("passport");
 const userModel = require("./models/userModel");
 const userRoutes = require("./routes/userRoutes");
 
-// Connect to Zeabur MongoDB through mongoose
 connectDB();
 
 const app = express();
 const port = process.env.PORT || 3030;
+
+// Handle options credentials check - before CORS
+// and fetch cookies credentials requirement
+app.use(credentials);
+
 app.use(cors(corsOptions));
 
 // built-in middleware to handle urlencoded data
 // "content-type: application/x-www-form-urlencoded"
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json
 app.use(express.json());
+
+// middleware for cookies
+app.use(cookieParser());
 
 // passport js
 app.use(
@@ -43,11 +52,12 @@ app.use(passport.session());
 // serve static files
 app.use(express.static(path.join(__dirname, "/public")));
 
-// Routes
+// routes
+// 測試用html
+app.use("/", require("./routes/rootRoute"));
+
 app.use("/api", userRoutes);
 app.use("/auth", require("./routes/auth"));
-
-app.use("/", require("./routes/rootRoute"));
 
 app.listen(port, () => {
   console.log(`listening at http://localhost:${port}`);

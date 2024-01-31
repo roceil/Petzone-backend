@@ -23,14 +23,16 @@ router.get(
     const user = req.user;
 
     console.log("Successful authentication, redirect to homepage.");
-    return res.send({ user });
+    // return res.send({ user });
+    return res.redirect("/welcome");
   }
 );
 
 // google 註冊 或 一般註冊
 router.post("/signup", authController.handleSignUp);
 
-router.get("/logout", (req, res) => {
+// router.get("/logout", authController.handleLogout);
+router.get("/logout", authController.handleLogout, (req, res) => {
   req.logOut((err) => {
     console.log("You logged out");
     if (err) return res.send(err);
