@@ -46,9 +46,9 @@ const handleSignIn = async (req, res) => {
       // sameSite: "None",
     });
     //正式 回傳accessToken
-    //res.json({ accessToken });
+    res.json({ accessToken });
 
-    res.redirect("/welcome");
+    // res.redirect("/welcome");
   } else {
     res.sendStatus(401);
   }
@@ -130,9 +130,32 @@ const handleLogout = async (req, res, next) => {
 
   res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true }); // secure:true - only serves on https
 
-  //正式送
-  //res.sendStatus(204);
-  next();
+  res.sendStatus(204).json({ message: "Successfully Loglout" });
 };
 
-module.exports = { handleSignIn, handleSignUp, handleLogout };
+const handleCheckLoginSuccess = (req, res) => {
+  if (req.user) {
+    res.status(200).json({
+      error: false,
+      message: "Successfully Loged In",
+      user: req.user,
+    });
+  } else {
+    res.status(403).json({ error: true, message: "Not Authorized" });
+  }
+};
+
+const handleLoginFailed = (req, res) => {
+  res.status(401).json({
+    error: true,
+    message: "Log in failure",
+  });
+};
+
+module.exports = {
+  handleSignIn,
+  handleSignUp,
+  handleLogout,
+  handleCheckLoginSuccess,
+  handleLoginFailed,
+};
