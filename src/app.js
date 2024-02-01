@@ -59,12 +59,12 @@ app.use("/", require("./routes/rootRoute"));
 app.use("/api", userRoutes);
 app.use("/auth", require("./routes/auth"));
 
-app.listen(port, () => {
-  console.log(`listening at http://localhost:${port}`);
-  userModel.connectToMongoDB();
-});
+// app.listen(port, () => {
+//   console.log(`listening at http://localhost:${port}`);
+//   userModel.connectToMongoDB();
+// });
 
 mongoose.connection.once("open", () => {
   console.log("Connected to 線上版 mongoDB");
-  // app.listen(port, () => console.log(`Server running on port ${port}`));
+  app.listen(port, () => console.log(`Server running on port ${port}`));
 });
