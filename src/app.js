@@ -1,5 +1,4 @@
-const dotenv = require("dotenv");
-dotenv.config({ path: ".env.local" });
+require("dotenv").config();
 const path = require("path");
 const cors = require("cors");
 const corsOptions = require("./configs/corsOptions");
@@ -66,5 +65,7 @@ app.use("/auth", require("./routes/auth"));
 
 mongoose.connection.once("open", () => {
   console.log("Connected to 線上版 mongoDB");
-  app.listen(port, () => console.log(`Server running on port ${port}`));
+  app.listen(port, () =>
+    console.log(`Server running on port ${port} http://localhost:${port}`)
+  );
 });
