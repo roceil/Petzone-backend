@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-size: 36px;
+  min-height: 100vh;
+  color: #fff;
+  background-color: #000 ;
+  display: grid;
+  place-content: center;
+}
+input {
+  padding: 0.5rem;
+}
+li {
+  list-style: none;
+  padding: 0.5rem;
+}
+
+button {
+  padding: 1rem;
+}
+
+a {
+  text-decoration: none;
+}
+
+.googleBtn {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  padding:1rem;
+}
+
+.googleBtn:hover{
+  background-color: #f0ebeb;
+}
