@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
 const passport = require("passport");
 const authController = require("../controllers/authController");
 
@@ -17,29 +16,28 @@ router.get(
 );
 router.get(
   "/google/redirect",
-  passport.authenticate("google", { failureRedirect: "/login" }),
-  (req, res) => {
-    console.log(req.user);
-    const user = req.user;
-
-    console.log("Successful authentication, redirect to homepage.");
-    // return res.send({ user });
-    return res.redirect("/welcome");
-  }
+  passport.authenticate("google", {
+    failureRedirect: "/login/failed",
+    successRedirect: process.env.CLIENT_URL,
+  })
 );
 
-// google 註冊 或 一般註冊
+//一般註冊
 router.post("/signup", authController.handleSignUp);
 
-// router.get("/logout", authController.handleLogout);
+// logout (adjust in future)
 router.get("/logout", authController.handleLogout, (req, res) => {
   req.logOut((err) => {
     console.log("You logged out");
     if (err) return res.send(err);
-    return res.redirect("/");
+    return res.redirect(process.env.CLIENT_URL);
   });
 });
 
-//////////////////////////////////
+// check isUser login (adjust in future)
+router.get("/login/success", authController.handleCheckLoginSuccess);
+
+// handle login failed
+router.get("/login/failed", authController.handleLoginFailed);
 
 module.exports = router;

@@ -66,4 +66,5 @@ app.listen(port, () => {
 
 mongoose.connection.once("open", () => {
   console.log("Connected to 線上版 mongoDB");
+  // app.listen(port, () => console.log(`Server running on port ${port}`));
 });
