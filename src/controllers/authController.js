@@ -92,7 +92,10 @@ const handleSignUp = async (req, res) => {
     });
     await newUser.save();
     console.log("用戶註冊成功!", newUser);
-    res.status(201).json({ success: `New ${newUser} created!` });
+    res.status(201).json({ 
+      success: `New ${newUser.name} created!`,
+      data: newUser,
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
