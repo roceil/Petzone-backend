@@ -55,7 +55,7 @@ const handleSignIn = async (req, res) => {
 };
 
 const handleSignUp = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, nickName, phone, address } = req.body;
   if (!email || !password || !name)
     return res
       .status(400)
@@ -80,10 +80,10 @@ const handleSignUp = async (req, res) => {
       photo: "",
       account: email,
       password: hashedPassword,
-      nickName: "",
+      nickName: nickName,
       intro: "",
-      address: "",
-      phone: "",
+      address: address,
+      phone: phone,
       historyPoints: null,
       points: null,
       pointsRecord: [],
@@ -134,7 +134,7 @@ const handleLogout = async (req, res, next) => {
 
   res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true }); // secure:true - only serves on https
 
-  res.sendStatus(204).json({ message: "Successfully Loglout" });
+  res.sendStatus(204).json({ error: false, message: "Successfully Logout" });
 };
 
 const handleCheckLoginSuccess = (req, res) => {

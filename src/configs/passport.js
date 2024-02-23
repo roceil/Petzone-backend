@@ -23,7 +23,7 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_REDIRECT_URL,
+      callbackURL: process.env.GOOGLE_REDIRECT_URL, // 要放後端位置
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log("===Google strategy===");
@@ -45,7 +45,7 @@ passport.use(
           googleID: profile.id,
           photo: profile.photos[0].value,
           account: profile.emails[0].value,
-          // google 登入無password 之後改成bycrpt上隨機密碼E
+          // google 登入無password 之後改成bycrpt上隨機密碼
           password: hashedPassword,
           nickName: "",
           intro: "",
