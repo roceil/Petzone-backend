@@ -14,6 +14,7 @@ const passport = require("passport");
 
 const userModel = require("./models/userModel");
 const userRoutes = require("./routes/userRoutes");
+const postRoutes = require("./routes/postRoutes");
 
 connectDB();
 
@@ -56,6 +57,7 @@ app.use(express.static(path.join(__dirname, "/public")));
 app.use("/", require("./routes/rootRoute"));
 
 app.use("/api", userRoutes);
+app.use("/api", postRoutes);
 app.use("/auth", require("./routes/auth"));
 
 // app.listen(port, () => {
