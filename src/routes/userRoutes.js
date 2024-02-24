@@ -1,11 +1,23 @@
 // src/routes/userRoutes.js
-const express = require("express");
-const router = express.Router();
-const userController = require("../controllers/userController");
+const express = require('express')
+const router = express.Router()
+const userController = require('../controllers/userController')
 
-router.get("/users", userController.getUserData);
+router.get('/users', userController.getUserData)
 
 // 我暫時用我online mongodb data
-router.get("/usersInfo", userController.getUsersInfo);
+router.get('/usersInfo', userController.getUsersInfo)
 
-module.exports = router;
+// 取得個人資料 By ID
+router.get('/usersInfoById/:id', userController.getUserInfoById)
+
+// 修改個人資料 By ID
+router.put('/usersInfoById/:id', userController.updateUserInfoById)
+
+// 捐贈個人點數 By ID
+router.put('/donatePointsById/:id', userController.donatePointsById)
+
+// 刪除所有用戶
+router.delete('/users', userController.deleteAllUsers)
+
+module.exports = router

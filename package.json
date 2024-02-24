@@ -25,6 +25,7 @@
     "passport-google-oauth20": "^2.0.0"
   },
   "devDependencies": {
+    "eslint": "^8.57.0",
     "nodemon": "^3.0.3"
   }
 }
