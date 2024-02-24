@@ -1,141 +1,176 @@
-const Product = require('../models/product-model')
-const { checkObjectId } = require('../lib')
+const Product = require("../models/product-model");
+const { checkObjectId } = require("../lib");
 
-const getAllProducts = async (req, res) => {
-  try {
-    const products = await Product.find()
-    if (!products.length) {
-      return res.status(202).json({ message: '尚無商品' })
+// 前台產品相關
+async function userGetProducts(req, res) {
+  console.log(req.query.category);
+
+  if (!req.query.category) {
+    try {
+      const Allproduct = await Product.find({ isEnabled: true }).exec();
+      if (Allproduct) {
+        console.log(Allproduct);
+        return res.send({ products: Allproduct });
+      } else {
+        return res.status(200).send({ message: "尚無商品" });
+      }
+    } catch (err) {
+      return res.status(400).send({ message: err.message });
     }
-    res.json(products)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
-  }
-}
+  } else {
+    try {
+      const Allproduct = await Product.find({
+        "category.type": req.query.category,
+        isEnabled: true,
+      }).exec();
 
-const createProduct = async (req, res) => {
-  try {
-    const {
-      name,
-      category,
-      photos,
-      originPrice,
-      price,
-      quantity,
-      unit,
-      description,
-      isEnabled,
-      review,
-    } = req.body
-    const newProduct = new Product({
-      name,
-      category,
-      photos,
-      originPrice,
-      price,
-      quantity,
-      unit,
-      description,
-      isEnabled,
-      review,
-    })
-    await newProduct.save()
-    res.json({ message: '新增商品成功', newProduct })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
-  }
-}
+      if (Allproduct.length === 0) {
+        return res.status(200).send({ message: "尚無商品" });
+      }
 
-const getProductById = async (req, res) => {
-  if (!checkObjectId(req.params.id)) {
-    return res.status(400).json({ message: '請檢查商品ID格式' })
-  }
-  try {
-    const product = await Product.findById(req.params.id)
-    if (!product) {
-      return res.status(400).json({ message: '沒有匹配的商品ID' })
+      return res.send({ products: Allproduct });
+    } catch (err) {
+      return res.status(400).send({ message: err.message });
     }
-    res.json(product)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
-const updateProductById = async (req, res) => {
-  const { id } = req.params
-  if (!checkObjectId(id)) {
-    return res.status(400).json({ message: '無效的ID格式' })
-  }
+async function userGetProduct(req, res) {
+  console.log(req.params);
+  const { productId } = req.params;
+
   try {
-    const product = await Product.findById(id)
-    if (!product) {
-      return res.status(400).json({ message: '沒有匹配的商品ID' })
+    const productExist = await Product.find({
+      _id: productId,
+      isEnabled: true,
+    }).exec();
+
+    if (productExist.length === 0) {
+      return res.status(200).send({ message: "產品不存在" });
     }
-    const {
-      name,
-      category,
-      photos,
-      originPrice,
-      price,
-      quantity,
-      unit,
-      description,
-      isEnabled,
-      review,
-    } = req.body
-    product.name = name || product.name
-    product.category = category || product.category
-    product.photos = photos || product.photos
-    product.originPrice = originPrice || product.originPrice
-    product.price = price || product.price
-    product.quantity = quantity || product.quantity
-    product.unit = unit || product.unit
-    product.description = description || product.description
-    product.isEnabled = isEnabled || product.isEnabled
-    product.review = review || product.review
-    await product.save()
-    res.json(product)
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+
+    return res.send({ product: productExist });
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
   }
 }
 
-const deleteProductById = async (req, res) => {
-  const { id } = req.params
-  if (!checkObjectId(id)) {
-    return res.status(400).json({ message: '無效的ID格式' })
-  }
+// 後台產品相關
+async function addProduct(req, res) {
+  console.log(req.body);
+  let product = req.body;
   try {
-    const product = await Product.findById(id)
-    if (!product) {
-      return res.status(400).json({ message: '沒有匹配的商品ID' })
+    const productExist = await Product.findOne({ name: product.name }).exec();
+
+    if (!productExist) {
+      const newProductData = { ...product, createAt: new Date().getTime() };
+      console.log(newProductData);
+      const newProduct = new Product({ ...newProductData });
+
+      await newProduct.save();
+      return res.status(200).send({
+        message: "新增產品成功",
+      });
+    } else {
+      return res.status(200).send({
+        message: "該產品已存在",
+      });
     }
-    await product.deleteOne()
-    res.json({ message: '刪除商品成功', productList: await Product.find()})
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
   }
 }
 
-const deleteAllProducts = async (req, res) => {
+async function deleteProduct(req, res) {
+  console.log(req.params);
+  const { productId } = req.params;
   try {
-    await Product.deleteMany()
-    res.json({ message: '刪除所有商品成功' })
-  } catch (error) {
-    console.error(error)
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+    const productExist = await Product.findOne({ _id: productId }).exec();
+
+    if (productExist) {
+      try {
+        await Product.deleteOne({ _id: productId }).exec();
+        return res.status(200).send({ message: "已刪除該產品" });
+      } catch (err) {
+        return res.status(400).send({ message: "刪除產品失敗" });
+      }
+    } else {
+      return res.status(200).send({ message: "該產品不存在" });
+    }
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
   }
 }
+
+async function updateProduct(req, res) {
+  console.log(req.params, req.body);
+  const { productId } = req.params;
+  const product = req.body;
+  try {
+    const productExist = await Product.findOne({ _id: productId }).exec();
+
+    if (productExist) {
+      let updateProduct = await Product.findOneAndUpdate(
+        {
+          _id: productId,
+        },
+        {
+          ...product,
+          updateAt: new Date().getTime(),
+        }
+      ).exec();
+      await updateProduct.save();
+      return res.status(200).send({
+        message: "已更新產品",
+      });
+    } else {
+      return res.status(200).send({
+        message: "該產品不存在",
+      });
+    }
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
+  }
+}
+
+async function getProducts(req, res) {
+  console.log(req.query.category);
+  try {
+    const Allproduct = await Product.find({}).exec();
+    if (Allproduct) {
+      console.log(Allproduct);
+      return res.send({ products: Allproduct });
+    } else {
+      return res.status(200).send({ message: "尚無商品" });
+    }
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
+  }
+}
+
+async function getProduct(req, res) {
+  console.log(req.params);
+  const { productId } = req.params;
+
+  try {
+    const productExist = await Product.find({ _id: productId }).exec();
+
+    if (productExist.length === 0) {
+      return res.status(200).send({ message: "產品不存在" });
+    }
+
+    return res.send({ product: productExist });
+  } catch (err) {
+    return res.status(400).send({ message: err.message });
+  }
+}
+
 module.exports = {
-  getAllProducts,
-  getProductById,
-  createProduct,
-  updateProductById,
-  deleteProductById,
-  deleteAllProducts,
-}
+  addProduct,
+  deleteProduct,
+  updateProduct,
+  getProducts,
+  getProduct,
+  userGetProducts,
+  userGetProduct,
+};

@@ -1,53 +1,42 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
+const { Schema } = mongoose;
 
-const productSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    category: {
-      type: Number,
-      required: true,
-    },
-    photos: {
-      type: Array,
-      default: [],
-      required: true,
-      items: {
-        type: String,
-      },
-    },
-    originPrice: {
-      type: Number,
-      required: true,
-    },
-    price: {
-      type: Number,
-    },
-    quantity: {
-      type: Number,
-      required: true,
-    },
-    unit: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      minLength: 3,
-      maxLength: 255,
-    },
-    isEnabled: {
-      type: Boolean,
-      default: true,
-      required: true,
-    },
-    review: {
-      type: Array,
-    },
+function category(val) {
+  const categoryList = {
+    1: { type: "dog", name: "狗狗主食" },
+    2: { type: "dog", name: "狗狗零食" },
+    3: { type: "dog", name: "貓貓主食" },
+    4: { type: "cat", name: "貓貓零食" },
+    5: { type: "cat", name: "貓砂系列" },
+    6: { type: "all", name: "保健系列" },
+    7: { type: "all", name: "沐浴 & 清潔" },
+    8: { type: "all", name: "生活用品 & 玩具" },
+  };
+
+  if (categoryList.hasOwnProperty(val)) {
+    return categoryList[val];
+  } else {
+    return null;
+  }
+}
+
+const productSchema = new Schema({
+  name: { type: String, required: true },
+  category: {
+    type: Object,
+    set: category,
   },
-  { timestamps: true },
-)
+  photos: { type: Array, default: [] },
+  originPrice: { type: Number, required: true },
+  price: { type: Number },
+  quantity: { type: Number, required: true },
+  unit: { type: String, required: true },
+  description: { type: String, minLength: 3, maxLength: 255 },
+  isEnabled: { type: Boolean, default: true, required: true },
+  review: { type: Array, default: [] },
+  createAt: { type: Number },
+  updateAt: { type: Number },
+});
 
-module.exports = mongoose.model('Product', productSchema)
+const Product = mongoose.model("Product", productSchema);
+module.exports = Product;
