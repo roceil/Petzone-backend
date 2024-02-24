@@ -4,6 +4,8 @@ const productController = require("../controllers/productController");
 const uploadController = require("../controllers/uploadController");
 
 // 前台產品相關
+router.get("/products", productController.userGetProducts);
+router.get("/product/:productId", productController.userGetProduct);
 
 // 後台產品相關
 router.post("/product", productController.addProduct);
