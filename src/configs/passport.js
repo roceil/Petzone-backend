@@ -1,6 +1,6 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20");
-
+const bcrypt = require("bcrypt");
 const User = require("../models/user-model");
 
 passport.serializeUser((user, done) => {
@@ -23,24 +23,30 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_REDIRECT_URL,
+      callbackURL: process.env.GOOGLE_REDIRECT_URL, // 要放後端位置
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log("===Google strategy===");
-
+      console.log("accessToken from google", accessToken);
       let foundUser = await User.findOne({ googleID: profile.id }).exec();
       if (foundUser) {
         console.log("使用者已經註冊過了。無須存入資料庫內。");
 
         done(null, foundUser); // 會去執行serializeUser
       } else {
+        const generatedPassword =
+          Math.random().toString(36).slice(-8) +
+          Math.random().toString(36).slice(-8);
+        const hashedPassword = await bcrypt.hash(generatedPassword, 12);
+
         console.log("使用者是第一次登入，將從google取得用戶資料並存入DB");
         const newUser = new User({
           name: profile.displayName,
           googleID: profile.id,
           photo: profile.photos[0].value,
           account: profile.emails[0].value,
-          // google 登入無password 之後改成bycrpt上隨機密碼E
+          // google 登入無password 之後改成bycrpt上隨機密碼
+          password: hashedPassword,
           nickName: "",
           intro: "",
           address: "",
@@ -52,6 +58,8 @@ passport.use(
           permission: "",
         });
         const savedUser = await newUser.save();
+        //
+
         console.log("成功創建新用戶。");
         done(null, savedUser);
       }

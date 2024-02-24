@@ -1,4 +1,5 @@
-const Product = require("../models/product");
+const Product = require("../models/product-model");
+const { checkObjectId } = require("../lib");
 
 // 前台產品相關
 async function userGetProducts(req, res) {
@@ -9,15 +10,12 @@ async function userGetProducts(req, res) {
       const Allproduct = await Product.find({ isEnabled: true }).exec();
       if (Allproduct) {
         console.log(Allproduct);
-        return res.send({ success: true, products: Allproduct });
+        return res.send({ products: Allproduct });
       } else {
-        return res.send({ success: false, message: "產品不存在" });
+        return res.status(200).send({ message: "尚無商品" });
       }
     } catch (err) {
-      return res.status(400).send({
-        success: false,
-        message: err.message,
-      });
+      return res.status(400).send({ message: err.message });
     }
   } else {
     try {
@@ -27,15 +25,12 @@ async function userGetProducts(req, res) {
       }).exec();
 
       if (Allproduct.length === 0) {
-        return res.send({ success: false, message: "查無產品" });
+        return res.status(200).send({ message: "尚無商品" });
       }
 
-      return res.send({ success: true, products: Allproduct });
+      return res.send({ products: Allproduct });
     } catch (err) {
-      return res.status(400).send({
-        success: false,
-        message: err.message,
-      });
+      return res.status(400).send({ message: err.message });
     }
   }
 }
@@ -51,15 +46,12 @@ async function userGetProduct(req, res) {
     }).exec();
 
     if (productExist.length === 0) {
-      return res.send({ success: false, message: "產品不存在" });
+      return res.status(200).send({ message: "產品不存在" });
     }
 
-    return res.send({ success: true, product: productExist });
+    return res.send({ product: productExist });
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
@@ -76,21 +68,16 @@ async function addProduct(req, res) {
       const newProduct = new Product({ ...newProductData });
 
       await newProduct.save();
-      return res.send({
-        success: true,
+      return res.status(200).send({
         message: "新增產品成功",
       });
     } else {
-      return res.send({
-        success: false,
+      return res.status(200).send({
         message: "該產品已存在",
       });
     }
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
@@ -103,27 +90,15 @@ async function deleteProduct(req, res) {
     if (productExist) {
       try {
         await Product.deleteOne({ _id: productId }).exec();
-        return res.send({
-          success: true,
-          message: "已刪除該產品",
-        });
+        return res.status(200).send({ message: "已刪除該產品" });
       } catch (err) {
-        return res.status(400).send({
-          success: false,
-          message: err.message,
-        });
+        return res.status(400).send({ message: "刪除產品失敗" });
       }
     } else {
-      return res.send({
-        success: false,
-        message: "該產品不存在",
-      });
+      return res.status(200).send({ message: "該產品不存在" });
     }
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
@@ -145,21 +120,16 @@ async function updateProduct(req, res) {
         }
       ).exec();
       await updateProduct.save();
-      return res.send({
-        success: true,
+      return res.status(200).send({
         message: "已更新產品",
       });
     } else {
-      return res.send({
-        success: false,
+      return res.status(200).send({
         message: "該產品不存在",
       });
     }
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
@@ -169,15 +139,12 @@ async function getProducts(req, res) {
     const Allproduct = await Product.find({}).exec();
     if (Allproduct) {
       console.log(Allproduct);
-      return res.send({ success: true, products: Allproduct });
+      return res.send({ products: Allproduct });
     } else {
-      return res.send({ success: false, message: "產品不存在" });
+      return res.status(200).send({ message: "尚無商品" });
     }
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
@@ -189,15 +156,12 @@ async function getProduct(req, res) {
     const productExist = await Product.find({ _id: productId }).exec();
 
     if (productExist.length === 0) {
-      return res.send({ success: false, message: "產品不存在" });
+      return res.status(200).send({ message: "產品不存在" });
     }
 
-    return res.send({ success: true, product: productExist });
+    return res.send({ product: productExist });
   } catch (err) {
-    return res.status(400).send({
-      success: false,
-      message: err.message,
-    });
+    return res.status(400).send({ message: err.message });
   }
 }
 
