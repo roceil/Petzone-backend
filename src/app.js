@@ -15,6 +15,7 @@ const passport = require("passport");
 const userModel = require("./models/userModel");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
+const productRoutes = require("./routes/productRoutes");
 
 connectDB();
 
@@ -58,6 +59,7 @@ app.use("/", require("./routes/rootRoute"));
 
 app.use("/api", userRoutes);
 app.use("/api", postRoutes);
+app.use("/api", productRoutes);
 app.use("/auth", require("./routes/auth"));
 
 // app.listen(port, () => {

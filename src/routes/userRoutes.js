@@ -17,4 +17,7 @@ router.put('/usersInfoById/:id', userController.updateUserInfoById)
 // 捐贈個人點數 By ID
 router.put('/donatePointsById/:id', userController.donatePointsById)
 
+// 刪除所有用戶
+router.delete('/users', userController.deleteAllUsers)
+
 module.exports = router

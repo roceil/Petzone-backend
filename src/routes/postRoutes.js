@@ -15,4 +15,13 @@ router.get('/posts/user/:userId', postController.getPostByUserId)
 // 新增貼文
 router.post('/posts', postController.createPost)
 
+// 編輯貼文 By ID
+router.put('/posts/:id', postController.updatePostById)
+
+// 刪除所有貼文
+router.delete('/posts', postController.deleteAllPosts)
+
+// 刪除貼文 By ID
+router.delete('/posts/:id', postController.deletePostById)
+
 module.exports = router

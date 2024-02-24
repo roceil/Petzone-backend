@@ -76,10 +76,20 @@ const donatePointsById = async (req, res) => {
   }
 }
 
+const deleteAllUsers = async (req, res) => {
+  try {
+    await User.deleteMany()
+    res.json({ message: '刪除所有用戶成功' })
+  } catch (error) {
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
 module.exports = {
   getUserData,
   getUsersInfo,
   getUserInfoById,
   updateUserInfoById,
   donatePointsById,
+  deleteAllUsers,
 }
