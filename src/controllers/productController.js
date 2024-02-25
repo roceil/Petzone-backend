@@ -3,32 +3,49 @@ const { checkObjectId } = require("../lib");
 
 // 前台產品相關
 async function userGetProducts(req, res) {
-  console.log(req.query.category);
+  // console.log(req.query);
+  // console.log(Object.keys(req.query));
 
-  if (!req.query.category) {
+  // 分類搜尋
+  if (Object.keys(req.query)[0] === "category") {
     try {
-      const Allproduct = await Product.find({ isEnabled: true }).exec();
-      if (Allproduct) {
-        console.log(Allproduct);
-        return res.send({ products: Allproduct });
-      } else {
-        return res.status(200).send({ message: "尚無商品" });
+      const Allproduct = await Product.find({
+        $or: [
+          { "category.type": req.query.category },
+          { "category.type": "all" },
+        ],
+        isEnabled: true,
+      }).exec();
+      if (Allproduct.length === 0) {
+        return res.status(200).send({ message: "查無此商品" });
       }
+      return res.send({ products: Allproduct });
+    } catch (err) {
+      return res.status(400).send({ message: err.message });
+    }
+    // 名稱搜尋
+  } else if (Object.keys(req.query)[0] === "name") {
+    try {
+      const Allproduct = await Product.find({
+        name: req.query.name,
+        isEnabled: true,
+      }).exec();
+      if (Allproduct.length === 0) {
+        return res.status(200).send({ message: "查無此商品" });
+      }
+      return res.send({ products: Allproduct });
     } catch (err) {
       return res.status(400).send({ message: err.message });
     }
   } else {
     try {
-      const Allproduct = await Product.find({
-        "category.type": req.query.category,
-        isEnabled: true,
-      }).exec();
-
-      if (Allproduct.length === 0) {
-        return res.status(200).send({ message: "尚無商品" });
+      const Allproduct = await Product.find({ isEnabled: true }).exec();
+      if (Allproduct) {
+        // console.log(Allproduct);
+        return res.send({ products: Allproduct });
+      } else {
+        return res.status(200).send({ message: "平台尚無商品" });
       }
-
-      return res.send({ products: Allproduct });
     } catch (err) {
       return res.status(400).send({ message: err.message });
     }
