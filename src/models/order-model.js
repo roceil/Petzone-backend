@@ -1,0 +1,102 @@
+const mongoose = require('mongoose')
+
+// 付款方式轉換器
+const paymentTypeConverter = value => {
+  const paymentTypes = {
+    1: 'cash',
+    2: 'credit card',
+  }
+
+  switch (value) {
+    case 1:
+      return paymentTypes[1]
+    case 2:
+      return paymentTypes[2]
+    default:
+      return 1
+  }
+}
+
+// 訂單狀態轉換器
+const statusConverter = value => {
+  const statuses = {
+    1: 'pending',
+    2: 'paid',
+    3: 'completed',
+    4: 'canceled',
+  }
+
+  switch (value) {
+    case 1:
+      return statuses[1]
+    case 2:
+      return statuses[2]
+    case 3:
+      return statuses[3]
+    case 4:
+      return statuses[4]
+    default:
+      return 1
+  }
+}
+
+const orderSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: String,
+      required: true,
+    },
+    recipient: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    address: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+      minLength: 10,
+    },
+    products: {
+      type: Array,
+      required: true,
+    },
+    totalPrice: {
+      type: Number,
+      required: true,
+    },
+    couponDiscount: {
+      type: Number,
+      required: true,
+    },
+    pointsDiscount: {
+      type: Number,
+      required: true,
+    },
+    finalPrice: {
+      type: Number,
+      required: true,
+    },
+    paymentType: {
+      type: String, // 修改字段類型為 String
+      enum: ['cash', 'credit card'], // 使用字符串值
+      set: paymentTypeConverter, // 保留轉換函數
+      required: true,
+    },
+    status: {
+      type: String, // 修改字段類型為 String
+      enum: ['pending', 'paid', 'completed', 'canceled'], // 使用字符串值
+      set: statusConverter, // 保留轉換函數
+      required: true,
+    },
+  },
+  { timestamps: true },
+)
+
+module.exports = mongoose.model('Order', orderSchema)

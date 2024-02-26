@@ -10,7 +10,7 @@ const getAllPosts = async (req, res) => {
 
     res.json(posts)
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -28,6 +28,24 @@ const getPostById = async (req, res) => {
   }
 }
 
+const getRandomPosts = async (req, res) => {
+  try {
+    const posts = await Post.aggregate([{ $sample: { size: 14 } }])
+    if (!posts.length) {
+      return res.status(202).json({ message: '尚無貼文' })
+    }
+
+    res.json({
+      status: 'success',
+      totalPosts: posts.length,
+      posts,
+    })
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 const getPostByUserId = async (req, res) => {
   try {
     const posts = await Post.find({ userId: req.params.userId })
@@ -37,7 +55,7 @@ const getPostByUserId = async (req, res) => {
 
     res.json(posts)
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -59,7 +77,7 @@ const createPost = async (req, res) => {
     await newPost.save()
     res.json(newPost)
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -68,7 +86,7 @@ const deleteAllPosts = async (req, res) => {
     await Post.deleteMany()
     res.json({ message: '刪除所有貼文成功' })
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -118,11 +136,10 @@ const updatePostById = async (req, res) => {
   }
 }
 
-
-
 module.exports = {
   getAllPosts,
   getPostById,
+  getRandomPosts,
   getPostByUserId,
   deleteAllPosts,
   createPost,
