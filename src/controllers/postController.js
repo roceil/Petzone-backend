@@ -1,14 +1,19 @@
 const mongoose = require('mongoose');
 
 const Post = require('../models/post-model')
+const User = require('../models/user-model')
 const { checkUserId, checkObjectId, getTokenInfo } = require('../lib')
 
 const getAllPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
-    if (!posts.length) {
-      return res.status(204).json({ message: '尚無貼文' })
+    const { nickName } = req.query
+    let searchNickName = {}
+    if (nickName) {
+      const users = await User.find({"nickName": { $regex: nickName, $options: 'i' }})
+      const userIds = users.map(user => user._id);
+      searchNickName = { user: { $in: userIds } }
     }
+    const posts = await Post.find(searchNickName)
 
     res.json(posts)
   } catch (error) {
