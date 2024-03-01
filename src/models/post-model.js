@@ -2,8 +2,9 @@ const mongoose = require('mongoose')
 
 const postSchema = new mongoose.Schema(
   {
-    userId: {
-      type: String,
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
       required: true,
     },
     tags: {

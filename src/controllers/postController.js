@@ -1,5 +1,7 @@
+const mongoose = require('mongoose');
+
 const Post = require('../models/post-model')
-const { checkUserId, checkObjectId } = require('../lib')
+const { checkUserId, checkObjectId, getTokenInfo } = require('../lib')
 
 const getAllPosts = async (req, res) => {
   try {
@@ -16,7 +18,10 @@ const getAllPosts = async (req, res) => {
 
 const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id)
+    const post = await Post.findById(req.params.id).populate({
+      path: 'user',
+      select: 'nickName photo'
+    })
     console.log('post', post)
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
@@ -30,7 +35,8 @@ const getPostById = async (req, res) => {
 
 const getPostByUserId = async (req, res) => {
   try {
-    const posts = await Post.find({ userId: req.params.userId })
+    const userId = new mongoose.Types.ObjectId(req.params.userId)
+    const posts = await Post.find({ user: userId  })
     if (!posts.length) {
       return res.status(204).json({ message: '尚無貼文' })
     }
@@ -43,7 +49,8 @@ const getPostByUserId = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { userId, tags, photos, content } = req.body
+    const { userId } = getTokenInfo(req)
+    const { tags, photos, content } = req.body
 
     // 檢查 userId 是否有存在於資料庫
     if (!(await checkUserId(userId))) {
@@ -51,7 +58,7 @@ const createPost = async (req, res) => {
     }
 
     const newPost = new Post({
-      userId,
+      user: userId,
       tags,
       photos,
       content,

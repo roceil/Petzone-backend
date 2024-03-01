@@ -7,21 +7,21 @@ const postController = require('../controllers/postController')
 router.get('/posts', postController.getAllPosts)
 
 // 取得貼文 By ID
-router.get('/posts/:id', postController.getPostById)
+router.get('/post/:id', postController.getPostById)
 
 // 取得貼文 By User ID
 router.get('/posts/user/:userId', postController.getPostByUserId)
 
 // 新增貼文
-router.post('/posts', postController.createPost)
+router.post('/post', postController.createPost)
 
 // 編輯貼文 By ID
-router.put('/posts/:id', postController.updatePostById)
+router.put('/post/:id', postController.updatePostById)
 
 // 刪除所有貼文
 router.delete('/posts', postController.deleteAllPosts)
 
 // 刪除貼文 By ID
-router.delete('/posts/:id', postController.deletePostById)
+router.delete('/post/:id', postController.deletePostById)
 
 module.exports = router
