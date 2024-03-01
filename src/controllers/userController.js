@@ -1,3 +1,4 @@
+const { getTokenInfo } = require('../lib')
 const userModel = require('../models/userModel')
 const User = require('../models/user-model')
 
@@ -85,6 +86,15 @@ const deleteAllUsers = async (req, res) => {
   }
 }
 
+const getSelfId = async (req, res) => {
+  try {
+    const { userId } = getTokenInfo(req)
+    res.json(userId)
+  } catch (error) {
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
 module.exports = {
   getUserData,
   getUsersInfo,
@@ -92,4 +102,5 @@ module.exports = {
   updateUserInfoById,
   donatePointsById,
   deleteAllUsers,
+  getSelfId
 }
