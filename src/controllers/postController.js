@@ -13,7 +13,7 @@ const getAllPosts = async (req, res) => {
       const userIds = users.map(user => user._id);
       searchNickName = { user: { $in: userIds } }
     }
-    const posts = await Post.find(searchNickName)
+    const posts = await Post.find(searchNickName).sort({ createdAt: -1 })
 
     res.json(posts)
   } catch (error) {
@@ -38,14 +38,15 @@ const getPostById = async (req, res) => {
   }
 }
 
-const getPostByUserId = async (req, res) => {
+const getPostsByUserId = async (req, res) => {
   try {
-    const userId = new mongoose.Types.ObjectId(req.params.userId)
-    const posts = await Post.find({ user: userId  })
-    if (!posts.length) {
-      return res.status(204).json({ message: '尚無貼文' })
-    }
+    const { userId } = req.params
 
+    // 檢查 userId 是否有存在於資料庫
+    checkUserId(userId, res)
+
+    const user = new mongoose.Types.ObjectId(req.params.userId)
+    const posts = await Post.find({ user })
     res.json(posts)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
@@ -58,8 +59,12 @@ const createPost = async (req, res) => {
     const { tags, photos, content } = req.body
 
     // 檢查 userId 是否有存在於資料庫
-    if (!(await checkUserId(userId))) {
-      return res.status(400).json({ message: 'userId 不存在' })
+    checkUserId(userId, res)
+    if (!content) {
+      res.status(400).json({ message: 'content 必填' })
+    }
+    if (content.length > 255) {
+      res.status(400).json({ message: 'content 最大長度為 255' })
     }
 
     const newPost = new Post({
@@ -69,7 +74,7 @@ const createPost = async (req, res) => {
       content,
     })
     await newPost.save()
-    res.json(newPost)
+    res.json({message: '新增貼文成功'})
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
   }
@@ -85,15 +90,21 @@ const deleteAllPosts = async (req, res) => {
 }
 
 const deletePostById = async (req, res) => {
+  const { userId } = getTokenInfo(req)
   const { id } = req.params
+
   // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  if (!checkObjectId(id)) {
-    return res.status(400).json({ message: '無效的ID格式' })
-  }
+  checkObjectId(id, res)
+  // 檢查 userId 是否有存在於資料庫
+  checkUserId(userId, res)
+
   try {
     const post = await Post.findById(id)
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+    if (userId !== post.user) {
+      return res.status(400).json({ message: '只可刪除自己的貼文' })
     }
 
     await post.deleteOne()
@@ -105,25 +116,97 @@ const deletePostById = async (req, res) => {
 }
 
 const updatePostById = async (req, res) => {
+  const { userId } = getTokenInfo(req)
   const { id } = req.params
 
   // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  if (!checkObjectId(id)) {
-    return res.status(400).json({ message: '無效的ID格式' })
-  }
+  checkObjectId(id, res)
+  // 檢查 userId 是否有存在於資料庫
+  checkUserId(userId, res)
 
   try {
     const post = await Post.findById(id)
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
+    if (userId !== `${post.user}`) {
+      return res.status(400).json({ message: '只可更新自己的貼文' })
+    }
 
     const { tags, photos, content } = req.body
+
+    if (!content) {
+      res.status(400).json({ message: 'content 必填' })
+    }
+    if (content.length > 255) {
+      res.status(400).json({ message: 'content 最大長度為 255' })
+    }
+
     post.tags = tags || post.tags
     post.photos = photos || post.photos
     post.content = content || post.content
     await post.save()
-    res.json(post)
+    res.json({ message: '更新貼文成功' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+const createPostLike = async (req, res) => {
+  const { userId } = getTokenInfo(req)
+  const { id } = req.params
+
+  // 檢查 id 是否是一個有效的 MongoDB ObjectId
+  checkObjectId(id, res)
+  // 檢查 userId 是否有存在於資料庫
+  checkUserId(userId, res)
+
+  try {
+    const post = await Post.findById(id)
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+    if(post.likes.find(item => item.userId === userId)) {
+      return res.status(400).json({ message: '已加入 likes 請用 put 更新' })
+    }
+    post.likes.push({
+      userId,
+      isLiked: true
+    })
+    await post.save()
+    res.json({message: '點讚成功'})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+const updatePostLike = async (req, res) => {
+  const { userId } = getTokenInfo(req)
+  const { id } = req.params
+
+  // 檢查 id 是否是一個有效的 MongoDB ObjectId
+  checkObjectId(id, res)
+  // 檢查 userId 是否有存在於資料庫
+  checkUserId(userId, res)
+
+  try {
+    const { isLiked } = req.body
+    const post = await Post.findById(id)
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+    let index = post.likes.findIndex(item => item.userId === userId)
+    if(index === -1) {
+      return res.status(400).json({ message: '尚未加入 likes 請用 post 新增' })
+    }
+    post.likes[index] = {
+      userId,
+      isLiked
+    }
+    await post.save()
+    res.json({message: '更新點讚成功'})
   } catch (error) {
     console.error(error)
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
@@ -135,9 +218,11 @@ const updatePostById = async (req, res) => {
 module.exports = {
   getAllPosts,
   getPostById,
-  getPostByUserId,
+  getPostsByUserId,
   deleteAllPosts,
   createPost,
   updatePostById,
   deletePostById,
+  createPostLike,
+  updatePostLike
 }
