@@ -43,13 +43,30 @@ const handleSignIn = async (req, res) => {
       const result = await foundUser.save()
       console.log('[Auth]', result)
 
-      res.cookie('jwt', refreshToken, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-        // sameSite: "None",
-      })
-      //正式 回傳accessToken
-      res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
+
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "60s" }
+    );
+
+    const refreshToken = jwt.sign(
+      { username: foundUser.username },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    // Saving refreshToken with current user
+    foundUser.refreshToken = refreshToken;
+    const result = await foundUser.save();
+    console.log("[Auth]", result);
+
+    res.cookie("accessToken", refreshToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      // sameSite: "None",
+    });
+    
+    //正式 回傳accessToken
+    res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
 
       // res.redirect("/welcome");
     } else {
@@ -57,6 +74,7 @@ const handleSignIn = async (req, res) => {
     }
   } catch (error) {
     console.log(error)
+
   }
 }
 
@@ -116,21 +134,31 @@ const handleLogout = async (req, res, next) => {
     return next()
   }
 
-  const cookies = req.cookies
-  console.log('🚀 ~ handleLogout ~ cookies:', cookies)
-  if (!cookies?.jwt) {
-    return res.sendStatus(204) // No content to send back
+
+  const cookies = req.cookies;
+  console.log("🚀 ~ handleLogout ~ cookies:", cookies);
+  if (!cookies?.accessToken) {
+    return res.sendStatus(204); // No content to send back
   }
 
-  const refreshToken = cookies.jwt
-  console.log('🚀 ~ handleLogout ~ refreshToken:', refreshToken)
+  const refreshToken = cookies.accessToken;
+  console.log("🚀 ~ handleLogout ~ refreshToken:", refreshToken);
+
 
   // Is refreshToken in db?
   const foundUser = await User.findOne({ refreshToken }).exec()
 
   if (!foundUser) {
-    res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true })
-    return res.sendStatus(204)
+
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+    });
+    return res
+      .sendStatus(204)
+      .json({ status: "success", message: "Successfully logged out!" });
+
   }
 
   // Delete refreshToken in db
@@ -138,7 +166,12 @@ const handleLogout = async (req, res, next) => {
   const result = await foundUser.save()
   console.log('[DELETE refreshToken]', result)
 
-  res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true }) // secure:true - only serves on https
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
+  }); // secure:true - only serves on https
 
   res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
 }
@@ -159,7 +192,8 @@ const handleCheckLoginSuccess = (req, res) => {
       .status(200)
       .json({
         error: false,
-        message: 'Successfully Loged In',
+        message: "Successfully Logged In",
+
         user: req.user,
       })
   } else {
