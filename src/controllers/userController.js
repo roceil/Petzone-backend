@@ -61,13 +61,30 @@ const updateUserInfoById = async (req, res) => {
       return res.status(400).json({ message: "沒有匹配的用戶ID" });
     }
 
-    const { name, nickName, phone, points } = req.body;
-    user.name = name;
-    user.nickName = nickName;
-    user.phone = phone;
-    user.points += points;
-    await user.save();
-    res.json(user);
+    const {
+      name,
+      photo,
+      intro,
+      historyPoints,
+      points,
+      pointsRecord,
+      cart,
+      nickName,
+      phone,
+    } = req.body
+
+    user.name = name || user.name
+    user.photo = photo || user.photo
+    user.intro = intro || user.intro
+    user.historyPoints = historyPoints || user.historyPoints
+    user.points = points || user.points
+    user.pointsRecord = pointsRecord || user.pointsRecord
+    user.cart = cart || user.cart
+    user.nickName = nickName || user.nickName
+    user.phone = phone || user.phone
+
+    await user.save()
+    res.json(user)
   } catch (error) {
     res.status(500).json({ message: "請檢查API格式或參數是否有誤" });
   }
@@ -108,7 +125,7 @@ const getSelfId = async (req, res) => {
 
     // 檢查 userId 是否有存在於資料庫
     checkUserId(userId, res)
-    
+
     res.json(userId)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
@@ -122,6 +139,6 @@ module.exports = {
   updateUserInfoById,
   donatePointsById,
   deleteAllUsers,
-  getSelfId
+  getSelfId,
 }
 
