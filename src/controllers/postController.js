@@ -11,7 +11,7 @@ const getAllTags = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   try {
-    const { nickName } = req.query
+    const { nickName, tag } = req.query
     let searchNickName = {}
     if (nickName) {
       const users = await User.find({
@@ -20,7 +20,15 @@ const getAllPosts = async (req, res) => {
       const userIds = users.map((user) => user._id)
       searchNickName = { user: { $in: userIds } }
     }
-    const posts = await Post.find(searchNickName).sort({ createdAt: -1 })
+    let searchTag = {}
+    if (tag) {
+      searchTag = { tags: { $in: tag } }
+    }
+    const search = {
+      ...searchNickName,
+      ...searchTag,
+    }
+    const posts = await Post.find(search).sort({ createdAt: -1 })
     const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
