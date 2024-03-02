@@ -101,6 +101,7 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'paid', 'completed', 'canceled'], // 使用字符串值
       set: statusConverter, // 保留轉換函數
       required: true,
+      default: 1,
     },
   },
   { timestamps: true }

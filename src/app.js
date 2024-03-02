@@ -64,7 +64,6 @@ app.use("/api", productRoutes);
 app.use("/api", orderRoutes);
 app.use("/auth", require("./routes/auth"));
 
-
 // app.listen(port, () => {
 //   console.log(`listening at http://localhost:${port}`);
 //   userModel.connectToMongoDB();
