@@ -20,4 +20,7 @@ router.put('/donatePointsById/:id', userController.donatePointsById)
 // 刪除所有用戶
 router.delete('/users', userController.deleteAllUsers)
 
+// 取得自己的 Id
+router.get('/selfId', userController.getSelfId)
+
 module.exports = router

@@ -1,29 +1,48 @@
-const User = require("../models/user-model");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const User = require('../models/user-model')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const handleSignIn = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+  try {
+    const { email, password } = req.body
 
-  const foundUser = await User.findOne({ account: email }).exec();
-  console.log("🚀 ~ foundUser:", foundUser);
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ message: 'Email and password are required.' })
 
-  if (!foundUser) return res.sendStatus(401); // Unauthorized
+    const foundUser = await User.findOne({ account: email }).exec()
+    console.log('🚀 ~ foundUser:', foundUser)
 
-  // evaluate password
-  const match = await bcrypt.compare(password, foundUser.password);
-  if (match) {
-    // create JWTs
-    const accessToken = jwt.sign(
-      {
-        UserInfo: {
-          username: foundUser.name,
+    if (!foundUser) return res.sendStatus(401) // Unauthorized
+
+    // evaluate password
+    const match = await bcrypt.compare(password, foundUser.password)
+    if (match) {
+      // create JWTs
+      const accessToken = jwt.sign(
+        {
+          UserInfo: {
+            userId: foundUser._id,
+            username: foundUser.name,
+          },
         },
-      },
+
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '1d' },
+      )
+
+      const refreshToken = jwt.sign(
+        { username: foundUser.username },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: '1d' },
+      )
+
+      // Saving refreshToken with current user
+      foundUser.refreshToken = refreshToken
+      const result = await foundUser.save()
+      console.log('[Auth]', result)
+
 
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "60s" }
@@ -45,74 +64,76 @@ const handleSignIn = async (req, res) => {
       maxAge: 24 * 60 * 60 * 1000,
       // sameSite: "None",
     });
-
-    const userAccount = foundUser.account;
-    const userPhoto = foundUser.photo;
-
+    
     //正式 回傳accessToken
-    res.json({ accessToken, account: userAccount, photo: userPhoto });
+    res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
 
-    // res.redirect("/welcome");
-  } else {
-    res.sendStatus(401);
+      // res.redirect("/welcome");
+    } else {
+      res.sendStatus(401)
+    }
+  } catch (error) {
+    console.log(error)
+
   }
-};
+}
 
 const handleSignUp = async (req, res) => {
-  const { name, email, password, nickName, phone, address } = req.body;
+  const { name, email, password, nickName, phone, address } = req.body
   if (!email || !password || !name)
     return res
       .status(400)
-      .json({ message: "Username and password are required." });
+      .json({ message: 'Username and password are required.' })
 
   // 確認信箱是否被註冊過
-  const duplicate = await User.findOne({ email }).exec();
+  const duplicate = await User.findOne({ email }).exec()
 
   if (duplicate) {
-    console.log("信箱已經被註冊。請使用另一個信箱，或者嘗試使用此信箱登入系統");
-    return res.sendStatus(409); // Conflict
+    console.log('信箱已經被註冊。請使用另一個信箱，或者嘗試使用此信箱登入系統')
+    return res.sendStatus(409) // Conflict
   }
 
   try {
     // encrpty the password (hash and salt)
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, 12)
 
     //create and store the new user
     const newUser = new User({
       name,
-      googleID: "",
-      photo: "",
+      googleID: '',
+      photo: '',
       account: email,
       password: hashedPassword,
       nickName: nickName,
-      intro: "",
+      intro: '',
       address: address,
       phone: phone,
       historyPoints: null,
       points: null,
       pointsRecord: [],
       cart: [],
-      permission: "",
-    });
-    await newUser.save();
-    console.log("用戶註冊成功!", newUser);
+      permission: '',
+    })
+    await newUser.save()
+    console.log('用戶註冊成功!', newUser)
     res.status(201).json({
       message: `New ${newUser.name} created!`,
       data: newUser,
-      status: "success",
-    });
+      status: 'success',
+    })
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message })
   }
-};
+}
 
 const handleLogout = async (req, res, next) => {
   // On client, also delete the accessToken
 
   // 假如用google登入就會有這個
   if (req.user) {
-    return next();
+    return next()
   }
+
 
   const cookies = req.cookies;
   console.log("🚀 ~ handleLogout ~ cookies:", cookies);
@@ -123,10 +144,12 @@ const handleLogout = async (req, res, next) => {
   const refreshToken = cookies.accessToken;
   console.log("🚀 ~ handleLogout ~ refreshToken:", refreshToken);
 
+
   // Is refreshToken in db?
-  const foundUser = await User.findOne({ refreshToken }).exec();
+  const foundUser = await User.findOne({ refreshToken }).exec()
 
   if (!foundUser) {
+
     res.clearCookie("accessToken", {
       httpOnly: true,
       sameSite: "None",
@@ -135,12 +158,14 @@ const handleLogout = async (req, res, next) => {
     return res
       .sendStatus(204)
       .json({ status: "success", message: "Successfully logged out!" });
+
   }
 
   // Delete refreshToken in db
-  foundUser.refreshToken = "";
-  const result = await foundUser.save();
-  console.log("[DELETE refreshToken]", result);
+  foundUser.refreshToken = ''
+  const result = await foundUser.save()
+  console.log('[DELETE refreshToken]', result)
+
 
   res.clearCookie("accessToken", {
     httpOnly: true,
@@ -148,19 +173,19 @@ const handleLogout = async (req, res, next) => {
     secure: true,
   }); // secure:true - only serves on https
 
-  res.sendStatus(204).json({ error: false, message: "Successfully Logout" });
-};
+  res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
+}
 
 const handleCheckLoginSuccess = (req, res) => {
   if (req.user) {
-    const expiryDate = new Date(Date.now() + 3600000); // 1 hour
+    const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
       { id: req.user._id },
-      process.env.ACCESS_TOKEN_SECRET
-    );
+      process.env.ACCESS_TOKEN_SECRET,
+    )
 
     res
-      .cookie("accessToken", accessToken, {
+      .cookie('accessToken', accessToken, {
         httpOnly: true,
         expires: expiryDate,
       })
@@ -168,19 +193,20 @@ const handleCheckLoginSuccess = (req, res) => {
       .json({
         error: false,
         message: "Successfully Logged In",
+
         user: req.user,
-      });
+      })
   } else {
-    res.status(403).json({ error: true, message: "Not Authorized" });
+    res.status(403).json({ error: true, message: 'Not Authorized' })
   }
-};
+}
 
 const handleLoginFailed = (req, res) => {
   res.status(401).json({
     error: true,
-    message: "Log in failure",
-  });
-};
+    message: 'Log in failure',
+  })
+}
 
 module.exports = {
   handleSignIn,
@@ -188,4 +214,4 @@ module.exports = {
   handleLogout,
   handleCheckLoginSuccess,
   handleLoginFailed,
-};
+}
