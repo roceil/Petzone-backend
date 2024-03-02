@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 // 付款方式轉換器
-const paymentTypeConverter = value => {
+const paymentTypeConverter = (value) => {
   const paymentTypes = {
     1: 'cash',
     2: 'credit card',
@@ -18,7 +18,7 @@ const paymentTypeConverter = value => {
 }
 
 // 訂單狀態轉換器
-const statusConverter = value => {
+const statusConverter = (value) => {
   const statuses = {
     1: 'pending',
     2: 'paid',
@@ -42,46 +42,53 @@ const statusConverter = value => {
 
 const orderSchema = new mongoose.Schema(
   {
-    userId: {
-      type: String,
-      required: true,
-    },
     recipient: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
-      required: true,
-    },
-    address: {
-      type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
-      minLength: 10,
+      userId: {
+        type: String,
+        default: null,
+      },
+      name: {
+        type: String,
+        required: true,
+      },
+      email: {
+        type: String,
+        required: true,
+      },
+      address: {
+        type: String,
+        required: true,
+      },
+      phone: {
+        type: String,
+        required: true,
+        minLength: 10,
+      },
     },
     products: {
       type: Array,
       required: true,
+      default: [],
     },
     totalPrice: {
       type: Number,
       required: true,
+      default: 0,
     },
     couponDiscount: {
       type: Number,
       required: true,
+      default: 0,
     },
     pointsDiscount: {
       type: Number,
       required: true,
+      default: 0,
     },
     finalPrice: {
       type: Number,
       required: true,
+      default: 0,
     },
     paymentType: {
       type: String, // 修改字段類型為 String
@@ -96,7 +103,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 module.exports = mongoose.model('Order', orderSchema)
