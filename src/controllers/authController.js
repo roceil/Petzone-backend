@@ -40,13 +40,17 @@ const handleSignIn = async (req, res) => {
     const result = await foundUser.save();
     console.log("[Auth]", result);
 
-    res.cookie("jwt", refreshToken, {
+    res.cookie("accessToken", refreshToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
       // sameSite: "None",
     });
+
+    const userAccount = foundUser.account;
+    const userPhoto = foundUser.photo;
+
     //正式 回傳accessToken
-    res.json({ accessToken });
+    res.json({ accessToken, account: userAccount, photo: userPhoto });
 
     // res.redirect("/welcome");
   } else {
@@ -112,19 +116,25 @@ const handleLogout = async (req, res, next) => {
 
   const cookies = req.cookies;
   console.log("🚀 ~ handleLogout ~ cookies:", cookies);
-  if (!cookies?.jwt) {
+  if (!cookies?.accessToken) {
     return res.sendStatus(204); // No content to send back
   }
 
-  const refreshToken = cookies.jwt;
+  const refreshToken = cookies.accessToken;
   console.log("🚀 ~ handleLogout ~ refreshToken:", refreshToken);
 
   // Is refreshToken in db?
   const foundUser = await User.findOne({ refreshToken }).exec();
 
   if (!foundUser) {
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-    return res.sendStatus(204);
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+    });
+    return res
+      .sendStatus(204)
+      .json({ status: "success", message: "Successfully logged out!" });
   }
 
   // Delete refreshToken in db
@@ -132,7 +142,11 @@ const handleLogout = async (req, res, next) => {
   const result = await foundUser.save();
   console.log("[DELETE refreshToken]", result);
 
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true }); // secure:true - only serves on https
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
+  }); // secure:true - only serves on https
 
   res.sendStatus(204).json({ error: false, message: "Successfully Logout" });
 };
@@ -153,7 +167,7 @@ const handleCheckLoginSuccess = (req, res) => {
       .status(200)
       .json({
         error: false,
-        message: "Successfully Loged In",
+        message: "Successfully Logged In",
         user: req.user,
       });
   } else {

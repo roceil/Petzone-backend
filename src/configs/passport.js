@@ -28,7 +28,9 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       console.log("===Google strategy===");
       console.log("accessToken from google", accessToken);
-      let foundUser = await User.findOne({ googleID: profile.id }).exec();
+      let foundUser = await User.findOne({
+        account: profile.emails[0].value,
+      }).exec();
       if (foundUser) {
         console.log("使用者已經註冊過了。無須存入資料庫內。");
 
