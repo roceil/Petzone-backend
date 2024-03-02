@@ -9,8 +9,8 @@ router.get('/posts', postController.getAllPosts)
 // 取得貼文 By ID
 router.get('/post/:id', postController.getPostById)
 
-// 取得貼文 By User ID
-router.get('/posts/user/:userId', postController.getPostByUserId)
+// 取得所有貼文 By User ID
+router.get('/posts/user/:userId', postController.getPostsByUserId)
 
 // 新增貼文
 router.post('/post', postController.createPost)
@@ -23,5 +23,17 @@ router.delete('/posts', postController.deleteAllPosts)
 
 // 刪除貼文 By ID
 router.delete('/post/:id', postController.deletePostById)
+
+// 點讚貼文
+router.post('/post/:id/like', postController.createPostLike)
+
+// 更新貼文點讚
+router.put('/post/:id/like', postController.updatePostLike)
+
+// 留言貼文
+router.post('/post/:id/comment', postController.createPostComment)
+
+// 更新留言貼文
+router.put('/post/:id/comment/:commentId', postController.updatePostComment)
 
 module.exports = router
