@@ -30,4 +30,10 @@ router.post('/post/:id/like', postController.createPostLike)
 // 更新貼文點讚
 router.put('/post/:id/like', postController.updatePostLike)
 
+// 留言貼文
+router.post('/post/:id/comment', postController.createPostComment)
+
+// 更新留言貼文
+router.put('/post/:id/comment/:commentId', postController.updatePostComment)
+
 module.exports = router
