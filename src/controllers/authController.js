@@ -69,7 +69,7 @@ const handleSignUp = async (req, res) => {
       .json({ message: "Username and password are required." });
 
   // 確認信箱是否被註冊過
-  const duplicate = await User.findOne({ email }).exec();
+  const duplicate = await User.findOne({ account: email }).exec();
 
   if (duplicate) {
     console.log("信箱已經被註冊。請使用另一個信箱，或者嘗試使用此信箱登入系統");
