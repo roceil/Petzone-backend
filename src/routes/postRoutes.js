@@ -3,6 +3,9 @@ const express = require('express')
 const router = express.Router()
 const postController = require('../controllers/postController')
 
+// 取得所有 tags
+router.get('/tags', postController.getAllTags)
+
 // 取得所有貼文
 router.get('/posts', postController.getAllPosts)
 

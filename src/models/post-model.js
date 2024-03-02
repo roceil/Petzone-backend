@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { tagsEnum } = require('../lib/enum')
 
 const postSchema = new mongoose.Schema(
   {
@@ -8,7 +9,8 @@ const postSchema = new mongoose.Schema(
       required: true,
     },
     tags: {
-      type: Array,
+      type: [String],
+      enum: tagsEnum,
     },
     photos: {
       type: Array,
