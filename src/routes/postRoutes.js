@@ -36,4 +36,7 @@ router.post('/post/:id/comment', postController.createPostComment)
 // 更新留言貼文
 router.put('/post/:id/comment/:commentId', postController.updatePostComment)
 
+// 刪除留言貼文
+router.delete('/post/:id/comment/:commentId', postController.deletePostComment)
+
 module.exports = router

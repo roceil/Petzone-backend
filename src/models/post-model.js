@@ -19,12 +19,39 @@ const postSchema = new mongoose.Schema(
       // minLength: 3,
       maxLength: 255,
     },
-    likes: {
-      type: Array,
-    },
-    comments: {
-      type: Array,
-    },
+    likes: [
+      {
+        userId: {
+          type: mongoose.Schema.ObjectId,
+          ref: 'User',
+        },
+        isLiked: {
+          type: Boolean,
+        },
+      },
+    ],
+    comments: [
+      {
+        _id: {
+          type: mongoose.Schema.ObjectId,
+        },
+        user: {
+          type: mongoose.Schema.ObjectId,
+          ref: 'User',
+        },
+        content: {
+          type: String,
+        },
+        createAt: {
+          type: Date,
+          default: Date.now,
+        },
+        updateAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     // createAt: {
     //   type: Date,
     //   default: Date.now,
@@ -34,7 +61,7 @@ const postSchema = new mongoose.Schema(
     //   default: Date.now,
     // },
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 module.exports = mongoose.model('Post', postSchema)

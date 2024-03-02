@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const Post = require('../models/post-model')
 const User = require('../models/user-model')
@@ -9,18 +9,19 @@ const getAllPosts = async (req, res) => {
     const { nickName } = req.query
     let searchNickName = {}
     if (nickName) {
-      const users = await User.find({"nickName": { $regex: nickName, $options: 'i' }})
-      const userIds = users.map(user => user._id);
+      const users = await User.find({
+        nickName: { $regex: nickName, $options: 'i' },
+      })
+      const userIds = users.map((user) => user._id)
       searchNickName = { user: { $in: userIds } }
     }
-    const posts = await Post.find(searchNickName)
-      .sort({ createdAt: -1 })
-    const returnPosts = posts.map(post => {
+    const posts = await Post.find(searchNickName).sort({ createdAt: -1 })
+    const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
         photo: post.photos[0],
         likesLength: post.likes.length,
-        commentsLength: post.comments.length
+        commentsLength: post.comments.length,
       }
     })
 
@@ -32,10 +33,15 @@ const getAllPosts = async (req, res) => {
 
 const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate({
-      path: 'user',
-      select: 'nickName photo'
-    })
+    const post = await Post.findById(req.params.id)
+      .populate({
+        path: 'user',
+        select: 'nickName photo',
+      })
+      .populate({
+        path: 'comments.user',
+        select: '_id nickName photo',
+      })
     console.log('post', post)
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
@@ -83,7 +89,7 @@ const createPost = async (req, res) => {
       content,
     })
     await newPost.save()
-    res.json({message: '新增貼文成功'})
+    res.json({ message: '新增貼文成功' })
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
   }
@@ -112,7 +118,7 @@ const deletePostById = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    if (userId !== post.user) {
+    if (userId !== `${post.user}`) {
       return res.status(400).json({ message: '只可刪除自己的貼文' })
     }
 
@@ -174,15 +180,15 @@ const createPostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    if(post.likes.find(item => item.userId === userId)) {
+    if (post.likes.find((item) => item.userId === userId)) {
       return res.status(400).json({ message: '已加入 likes 請用 put 更新' })
     }
     post.likes.push({
       userId,
-      isLiked: true
+      isLiked: true,
     })
     await post.save()
-    res.json({message: '點讚成功'})
+    res.json({ message: '點讚成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
@@ -203,16 +209,16 @@ const updatePostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    let index = post.likes.findIndex(item => item.userId === userId)
-    if(index === -1) {
+    let index = post.likes.findIndex((item) => item.userId === userId)
+    if (index === -1) {
       return res.status(400).json({ message: '尚未加入 likes 請用 post 新增' })
     }
     post.likes[index] = {
       userId,
-      isLiked
+      isLiked,
     }
     await post.save()
-    res.json({message: '更新點讚成功'})
+    res.json({ message: '更新點讚成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
@@ -238,13 +244,13 @@ const createPostComment = async (req, res) => {
     }
     post.comments.push({
       _id: new mongoose.Types.ObjectId(),
-      userId,
+      user: userId,
       content,
       createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString()
+      updateAt: new Date().toISOString(),
     })
     await post.save()
-    res.json({message: '新增留言成功'})
+    res.json({ message: '新增留言成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
@@ -266,29 +272,60 @@ const updatePostComment = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    const index = post.comments.findIndex(item => `${item._id}` === commentId)
+    const index = post.comments.findIndex((item) => `${item._id}` === commentId)
     if (index === -1) {
       return res.status(400).json({ message: '沒有匹配的留言ID' })
+    }
+    if (userId !== `${post.comments[index].user}`) {
+      return res.status(400).json({ message: '只可更新自己的留言' })
     }
     if (!content) {
       res.status(400).json({ message: 'content 必填' })
     }
     post.comments[index] = {
       _id: post.comments[index]._id,
-      userId: post.comments[index].userId,
+      user: post.comments[index].user,
       content,
       createAt: post.comments[index].createAt,
-      updateAt: new Date().toISOString()
+      updateAt: new Date().toISOString(),
     }
-    console.log(post);
     await post.save()
-    res.json({message: '更新留言成功'})
+    res.json({ message: '更新留言成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
+const deletePostComment = async (req, res) => {
+  const { userId } = getTokenInfo(req)
+  const { id, commentId } = req.params
 
+  // 檢查 id 是否是一個有效的 MongoDB ObjectId
+  checkObjectId(id, res)
+  checkObjectId(commentId, res)
+  // 檢查 userId 是否有存在於資料庫
+  checkUserId(userId, res)
+
+  try {
+    const post = await Post.findById(id)
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+    console.log(commentId)
+    const index = post.comments.findIndex((item) => `${item._id}` === commentId)
+    if (index === -1) {
+      return res.status(400).json({ message: '沒有匹配的留言ID' })
+    }
+    if (userId !== `${post.comments[index].user}`) {
+      return res.status(400).json({ message: '只可刪除自己的留言' })
+    }
+    post.comments.splice(index, 1)
+    await post.save()
+    res.json({ message: '刪除留言成功' })
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
 
 module.exports = {
   getAllPosts,
@@ -301,5 +338,6 @@ module.exports = {
   createPostLike,
   updatePostLike,
   createPostComment,
-  updatePostComment
+  updatePostComment,
+  deletePostComment,
 }
