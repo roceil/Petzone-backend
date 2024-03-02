@@ -3,6 +3,11 @@ const mongoose = require('mongoose')
 const Post = require('../models/post-model')
 const User = require('../models/user-model')
 const { checkUserId, checkObjectId, getTokenInfo } = require('../lib')
+const { tags } = require('../lib/enum')
+
+const getAllTags = async (req, res) => {
+  res.json(tags)
+}
 
 const getAllPosts = async (req, res) => {
   try {
@@ -328,6 +333,7 @@ const deletePostComment = async (req, res) => {
 }
 
 module.exports = {
+  getAllTags,
   getAllPosts,
   getPostById,
   getPostsByUserId,
