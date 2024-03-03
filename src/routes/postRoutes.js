@@ -9,6 +9,9 @@ router.get('/tags', postController.getAllTags)
 // 取得所有貼文
 router.get('/posts', postController.getAllPosts)
 
+// 隨機14篇貼文
+router.get('/posts/random', postController.getRandomPosts)
+
 // 取得貼文 By ID
 router.get('/post/:id', postController.getPostById)
 

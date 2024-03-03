@@ -16,6 +16,7 @@ const userModel = require("./models/userModel");
 const userRoutes = require("./routes/userRoutes");
 const postRoutes = require("./routes/postRoutes");
 const productRoutes = require("./routes/productRoutes");
+const orderRoutes = require("./routes/orderRoutes");
 
 connectDB();
 
@@ -60,6 +61,7 @@ app.use("/", require("./routes/rootRoute"));
 app.use("/api", userRoutes);
 app.use("/api", postRoutes);
 app.use("/api", productRoutes);
+app.use("/api", orderRoutes);
 app.use("/auth", require("./routes/auth"));
 
 // app.listen(port, () => {

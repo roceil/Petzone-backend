@@ -40,7 +40,7 @@ const getAllPosts = async (req, res) => {
 
     res.json(returnPosts)
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -77,7 +77,7 @@ const getPostsByUserId = async (req, res) => {
     const posts = await Post.find({ user })
     res.json(posts)
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -104,7 +104,7 @@ const createPost = async (req, res) => {
     await newPost.save()
     res.json({ message: '新增貼文成功' })
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
@@ -113,7 +113,7 @@ const deleteAllPosts = async (req, res) => {
     await Post.deleteMany()
     res.json({ message: '刪除所有貼文成功' })
   } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
 
