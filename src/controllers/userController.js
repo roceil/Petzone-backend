@@ -1,5 +1,7 @@
+const { checkUserId, getTokenInfo } = require('../lib')
 const userModel = require('../models/userModel')
 const User = require('../models/user-model')
+const APIFeatures = require('../utils/apiFeatures')
 
 async function getUserData(req, res) {
   try {
@@ -12,13 +14,32 @@ async function getUserData(req, res) {
 
 const getUsersInfo = async (req, res) => {
   try {
-    const users = await User.find()
+    // const users = await User.find();
+    const authCheck = await getTokenInfo(req)
+    if (!authCheck) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
+
+    const features = new APIFeatures(User.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate()
+
+    const users = await features.query
+
     if (!users.length) {
       console.log('no user')
       return res.status(204).json({ message: 'no user found' })
     }
 
-    res.json(users)
+    res.status(200).json({
+      status: 'success',
+      results: users.length,
+      data: {
+        users,
+      },
+    })
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
   }
@@ -26,6 +47,10 @@ const getUsersInfo = async (req, res) => {
 
 const getUserInfoById = async (req, res) => {
   try {
+    const authCheck = await getTokenInfo(req)
+    if (!authCheck) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
     const user = await User.findById(req.params.id)
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
@@ -39,16 +64,38 @@ const getUserInfoById = async (req, res) => {
 
 const updateUserInfoById = async (req, res) => {
   try {
+    const authCheck = await getTokenInfo(req)
+    if (!authCheck) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
+
     const user = await User.findById(req.params.id)
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
     }
 
-    const { name, nickName, phone, points } = req.body
-    user.name = name
-    user.nickName = nickName
-    user.phone = phone
-    user.points += points
+    const {
+      name,
+      photo,
+      intro,
+      historyPoints,
+      points,
+      pointsRecord,
+      cart,
+      nickName,
+      phone,
+    } = req.body
+
+    user.name = name || user.name
+    user.photo = photo || user.photo
+    user.intro = intro || user.intro
+    user.historyPoints = historyPoints || user.historyPoints
+    user.points = points || user.points
+    user.pointsRecord = pointsRecord || user.pointsRecord
+    user.cart = cart || user.cart
+    user.nickName = nickName || user.nickName
+    user.phone = phone || user.phone
+
     await user.save()
     res.json(user)
   } catch (error) {
@@ -58,6 +105,10 @@ const updateUserInfoById = async (req, res) => {
 
 const donatePointsById = async (req, res) => {
   try {
+    const authCheck = await getTokenInfo(req)
+    if (!authCheck) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
     const user = await User.findById(req.params.id)
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
@@ -78,8 +129,26 @@ const donatePointsById = async (req, res) => {
 
 const deleteAllUsers = async (req, res) => {
   try {
+    const authCheck = await getTokenInfo(req)
+    if (!authCheck) {
+      return res.status(401).json({ message: 'Not authorized' })
+    }
+
     await User.deleteMany()
     res.json({ message: '刪除所有用戶成功' })
+  } catch (error) {
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
+const getSelfId = async (req, res) => {
+  try {
+    const { userId } = getTokenInfo(req)
+
+    // 檢查 userId 是否有存在於資料庫
+    checkUserId(userId, res)
+
+    res.json(userId)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
   }
@@ -92,4 +161,5 @@ module.exports = {
   updateUserInfoById,
   donatePointsById,
   deleteAllUsers,
+  getSelfId,
 }

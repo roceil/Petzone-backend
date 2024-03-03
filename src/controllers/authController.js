@@ -3,54 +3,61 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const handleSignIn = async (req, res) => {
-  const { email, password } = req.body;
-  if (!email || !password)
-    return res
-      .status(400)
-      .json({ message: "Email and password are required." });
+  try {
+    const { email, password } = req.body;
 
-  const foundUser = await User.findOne({ account: email }).exec();
-  console.log("🚀 ~ foundUser:", foundUser);
+    if (!email || !password)
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
 
-  if (!foundUser) return res.sendStatus(401); // Unauthorized
+    const foundUser = await User.findOne({ account: email }).exec();
+    console.log("🚀 ~ foundUser:", foundUser);
 
-  // evaluate password
-  const match = await bcrypt.compare(password, foundUser.password);
-  if (match) {
-    // create JWTs
-    const accessToken = jwt.sign(
-      {
-        UserInfo: {
-          username: foundUser.name,
+    if (!foundUser) return res.sendStatus(401); // Unauthorized
+
+    // evaluate password
+    const match = await bcrypt.compare(password, foundUser.password);
+    if (match) {
+      // create JWTs
+      const accessToken = jwt.sign(
+        {
+          UserInfo: {
+            userId: foundUser._id,
+            username: foundUser.name,
+          },
         },
-      },
 
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "60s" }
-    );
+        process.env.ACCESS_TOKEN_SECRET,
+        { expiresIn: "1d" }
+      );
 
-    const refreshToken = jwt.sign(
-      { username: foundUser.username },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "1d" }
-    );
+      const refreshToken = jwt.sign(
+        { username: foundUser.username },
+        process.env.REFRESH_TOKEN_SECRET,
+        { expiresIn: "1d" }
+      );
 
-    // Saving refreshToken with current user
-    foundUser.refreshToken = refreshToken;
-    const result = await foundUser.save();
-    console.log("[Auth]", result);
+      // Saving refreshToken with current user
+      foundUser.refreshToken = refreshToken;
+      const result = await foundUser.save();
+      console.log("[Auth]", result);
 
-    res.cookie("jwt", refreshToken, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      // sameSite: "None",
-    });
-    //正式 回傳accessToken
-    res.json({ accessToken });
+      res.cookie("accessToken", refreshToken, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        // sameSite: "None",
+      });
 
-    // res.redirect("/welcome");
-  } else {
-    res.sendStatus(401);
+      //正式 回傳accessToken
+      res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id });
+
+      // res.redirect("/welcome");
+    } else {
+      res.sendStatus(401);
+    }
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -62,7 +69,7 @@ const handleSignUp = async (req, res) => {
       .json({ message: "Username and password are required." });
 
   // 確認信箱是否被註冊過
-  const duplicate = await User.findOne({ email }).exec();
+  const duplicate = await User.findOne({ account: email }).exec();
 
   if (duplicate) {
     console.log("信箱已經被註冊。請使用另一個信箱，或者嘗試使用此信箱登入系統");
@@ -112,19 +119,25 @@ const handleLogout = async (req, res, next) => {
 
   const cookies = req.cookies;
   console.log("🚀 ~ handleLogout ~ cookies:", cookies);
-  if (!cookies?.jwt) {
+  if (!cookies?.accessToken) {
     return res.sendStatus(204); // No content to send back
   }
 
-  const refreshToken = cookies.jwt;
+  const refreshToken = cookies.accessToken;
   console.log("🚀 ~ handleLogout ~ refreshToken:", refreshToken);
 
   // Is refreshToken in db?
   const foundUser = await User.findOne({ refreshToken }).exec();
 
   if (!foundUser) {
-    res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true });
-    return res.sendStatus(204);
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      sameSite: "None",
+      secure: true,
+    });
+    return res
+      .sendStatus(204)
+      .json({ status: "success", message: "Successfully logged out!" });
   }
 
   // Delete refreshToken in db
@@ -132,7 +145,11 @@ const handleLogout = async (req, res, next) => {
   const result = await foundUser.save();
   console.log("[DELETE refreshToken]", result);
 
-  res.clearCookie("jwt", { httpOnly: true, sameSite: "None", secure: true }); // secure:true - only serves on https
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    sameSite: "None",
+    secure: true,
+  }); // secure:true - only serves on https
 
   res.sendStatus(204).json({ error: false, message: "Successfully Logout" });
 };
@@ -153,7 +170,8 @@ const handleCheckLoginSuccess = (req, res) => {
       .status(200)
       .json({
         error: false,
-        message: "Successfully Loged In",
+        message: "Successfully Logged In",
+
         user: req.user,
       });
   } else {
