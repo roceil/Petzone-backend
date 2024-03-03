@@ -23,4 +23,9 @@ router.delete('/users', userController.deleteAllUsers)
 // 取得自己的 Id
 router.get('/selfId', userController.getSelfId)
 
+// 新增積分記錄
+router.post('/addPointsRecord', userController.addPointsRecord)
+
+// 取得本月最佳慈善捐款者
+router.get('/getBestDonator', userController.getBestDonator)
 module.exports = router
