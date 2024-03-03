@@ -3,8 +3,8 @@ const mongoose = require('mongoose')
 // 付款方式轉換器
 const paymentTypeConverter = (value) => {
   const paymentTypes = {
-    1: 'cash',
-    2: 'credit card',
+    1: '現金',
+    2: '信用卡',
   }
 
   switch (value) {
@@ -20,10 +20,10 @@ const paymentTypeConverter = (value) => {
 // 訂單狀態轉換器
 const statusConverter = (value) => {
   const statuses = {
-    1: 'pending',
-    2: 'paid',
-    3: 'completed',
-    4: 'canceled',
+    1: '未付款',
+    2: '已付款',
+    3: '已完成',
+    4: '已取消',
   }
 
   switch (value) {
@@ -92,13 +92,13 @@ const orderSchema = new mongoose.Schema(
     },
     paymentType: {
       type: String, // 修改字段類型為 String
-      enum: ['cash', 'credit card'], // 使用字符串值
+      enum: ['現金', '信用卡'], // 使用字符串值
       set: paymentTypeConverter, // 保留轉換函數
       required: true,
     },
     status: {
       type: String, // 修改字段類型為 String
-      enum: ['pending', 'paid', 'completed', 'canceled'], // 使用字符串值
+      enum: ['未付款', ' 已付款', '已完成', '已取消'], // 使用字符串值
       set: statusConverter, // 保留轉換函數
       required: true,
       default: 1,
