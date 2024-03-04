@@ -2,7 +2,6 @@ const mongoose = require('mongoose')
 
 const Post = require('../models/post-model')
 const User = require('../models/user-model')
-const { checkUserId, checkObjectId, getTokenInfo } = require('../lib')
 const { tags } = require('../lib/enum')
 
 const getAllTags = async (req, res) => {
@@ -68,11 +67,6 @@ const getPostById = async (req, res) => {
 
 const getPostsByUserId = async (req, res) => {
   try {
-    const { userId } = req.params
-
-    // 檢查 userId 是否有存在於資料庫
-    checkUserId(userId, res)
-
     const user = new mongoose.Types.ObjectId(req.params.userId)
     const posts = await Post.find({ user })
     res.json(posts)
@@ -83,13 +77,11 @@ const getPostsByUserId = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { userId } = getTokenInfo(req)
+    const { userId } = req
     const { tags, photos, content } = req.body
 
-    // 檢查 userId 是否有存在於資料庫
-    checkUserId(userId, res)
-    if (!content) {
-      res.status(400).json({ message: 'content 必填' })
+    if (!photos.length || photos.length > 3) {
+      res.status(400).json({ message: 'photos 數量需介於 1~3' })
     }
     if (content.length > 255) {
       res.status(400).json({ message: 'content 最大長度為 255' })
@@ -118,14 +110,8 @@ const deleteAllPosts = async (req, res) => {
 }
 
 const deletePostById = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const post = await Post.findById(id)
     if (!post) {
@@ -143,14 +129,8 @@ const deletePostById = async (req, res) => {
 }
 
 const updatePostById = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const post = await Post.findById(id)
     if (!post) {
@@ -180,14 +160,8 @@ const updatePostById = async (req, res) => {
 }
 
 const createPostLike = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const post = await Post.findById(id)
     if (!post) {
@@ -208,14 +182,8 @@ const createPostLike = async (req, res) => {
 }
 
 const updatePostLike = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const { isLiked } = req.body
     const post = await Post.findById(id)
@@ -238,14 +206,8 @@ const updatePostLike = async (req, res) => {
 }
 
 const createPostComment = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const { content } = req.body
     const post = await Post.findById(id)
@@ -270,15 +232,8 @@ const createPostComment = async (req, res) => {
 }
 
 const updatePostComment = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id, commentId } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  checkObjectId(commentId, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const { content } = req.body
     const post = await Post.findById(id)
@@ -310,15 +265,8 @@ const updatePostComment = async (req, res) => {
 }
 
 const deletePostComment = async (req, res) => {
-  const { userId } = getTokenInfo(req)
+  const { userId } = req
   const { id, commentId } = req.params
-
-  // 檢查 id 是否是一個有效的 MongoDB ObjectId
-  checkObjectId(id, res)
-  checkObjectId(commentId, res)
-  // 檢查 userId 是否有存在於資料庫
-  checkUserId(userId, res)
-
   try {
     const post = await Post.findById(id)
     if (!post) {

@@ -1,4 +1,4 @@
-const { checkUserId, getTokenInfo } = require('../lib')
+const { getTokenInfo } = require('../lib')
 const userModel = require('../models/userModel')
 const User = require('../models/user-model')
 const APIFeatures = require('../utils/apiFeatures')
@@ -143,11 +143,7 @@ const deleteAllUsers = async (req, res) => {
 
 const getSelfId = async (req, res) => {
   try {
-    const { userId } = getTokenInfo(req)
-
-    // 檢查 userId 是否有存在於資料庫
-    checkUserId(userId, res)
-
+    const { userId } = req
     res.json(userId)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
