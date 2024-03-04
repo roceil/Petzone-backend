@@ -38,7 +38,37 @@ const getCart = async (req, res) => {
   }
 }
 
+const updateCart = async (req, res) => {
+  try {
+    // console.log(req.params, req.body)
+
+    const userId = req.params.userId
+    const productId = req.body.productId
+    const newQty = req.body.qty
+    console.log(userId, productId, newQty)
+    User.findOneAndUpdate(
+      { _id: userId, 'cart.productId': productId },
+      { $set: { 'cart.$.qty': newQty } },
+      { new: true }
+    )
+      .exec()
+      .then((updatedUser) => {
+        if (updatedUser) {
+          return res.status(200).send({ message: '儲存購物車成功' })
+        } else {
+          console.log('未找到該用戶或產品')
+        }
+      })
+      .catch((error) => {
+        console.error('更新时出錯：', error)
+      })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+}
+
 module.exports = {
   addToCart,
   getCart,
+  updateCart,
 }

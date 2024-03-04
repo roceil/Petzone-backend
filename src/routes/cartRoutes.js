@@ -9,6 +9,9 @@ router.post('/cart/:userId', cartController.addToCart)
 // 取得會員購物車資料
 router.get('/cart/:userId', cartController.getCart)
 
+// 更新會員購物車資料
+router.put('/cart/:userId', cartController.updateCart)
+
 // 刪除會員購物車資料
 // router.delete('/cart/:userId', cartController.deleteFromCart)
 
