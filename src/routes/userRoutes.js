@@ -12,7 +12,7 @@ router.get('/usersInfo', userController.getUsersInfo)
 router.get('/usersInfoById/:id', userController.getUserInfoById)
 
 // 修改個人資料 By ID
-router.put('/usersInfoById/:id', userController.updateUserInfoById)
+router.patch('/usersInfoById/:id', userController.updateUserInfoById)
 
 // 捐贈個人點數 By ID
 router.put('/donatePointsById/:id', userController.donatePointsById)
@@ -23,4 +23,9 @@ router.delete('/users', userController.deleteAllUsers)
 // 取得自己的 Id
 router.get('/selfId', userController.getSelfId)
 
+// 新增積分記錄
+router.post('/addPointsRecord', userController.addPointsRecord)
+
+// 取得本月最佳慈善捐款者
+router.get('/getBestDonator', userController.getBestDonator)
 module.exports = router
