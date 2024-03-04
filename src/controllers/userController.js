@@ -1,5 +1,5 @@
 const dayjs = require('dayjs')
-const { checkUserId, getTokenInfo } = require('../lib')
+const { getTokenInfo } = require('../lib')
 const userModel = require('../models/userModel')
 const User = require('../models/user-model')
 const APIFeatures = require('../utils/apiFeatures')
@@ -75,16 +75,8 @@ const updateUserInfoById = async (req, res) => {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
     }
 
-    const {
-      name,
-      photo,
-      intro,
-      historyPoints,
-      points,
-      cart,
-      nickName,
-      phone,
-    } = req.body
+    const { name, photo, intro, historyPoints, points, cart, nickName, phone } =
+      req.body
 
     user.name = name || user.name
     user.photo = photo || user.photo
@@ -158,11 +150,7 @@ const deleteAllUsers = async (req, res) => {
 
 const getSelfId = async (req, res) => {
   try {
-    const { userId } = getTokenInfo(req)
-
-    // 檢查 userId 是否有存在於資料庫
-    checkUserId(userId, res)
-
+    const { userId } = req
     res.json(userId)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
@@ -176,8 +164,6 @@ const addPointsRecord = async (req, res) => {
       return res.status(401).json({ message: 'Not authorized' })
     }
     const { userId } = getTokenInfo(req)
-    // 檢查 userId 是否有存在於資料庫
-    checkUserId(userId, res)
 
     const user = await User.findById(userId)
     if (!user) {
@@ -186,7 +172,7 @@ const addPointsRecord = async (req, res) => {
 
     const { changePoints, reason } = req.body
 
-    console.log("findUser", user)
+    console.log('findUser', user)
 
     // 寫入積分變動記錄
     const newRecord = {
@@ -220,9 +206,9 @@ const getBestDonator = async (req, res) => {
     const currentYear = dayjs().year() // 獲取當前年份
 
     let totalDonation = 0
-    const userDonations = users.map(user => {
+    const userDonations = users.map((user) => {
       const monthlyDonations = user.pointsRecord
-        .filter(record => {
+        .filter((record) => {
           const recordMonth = dayjs(record.createAt).month()
           const recordYear = dayjs(record.createAt).year()
           return (

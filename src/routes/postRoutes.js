@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const postController = require('../controllers/postController')
+const { isUser, isAdmin } = require('../middleware/auth')
 
 // 取得所有 tags
 router.get('/tags', postController.getAllTags)
@@ -19,30 +20,38 @@ router.get('/post/:id', postController.getPostById)
 router.get('/posts/user/:userId', postController.getPostsByUserId)
 
 // 新增貼文
-router.post('/post', postController.createPost)
+router.post('/post', isUser, postController.createPost)
 
 // 編輯貼文 By ID
-router.put('/post/:id', postController.updatePostById)
+router.put('/post/:id', isUser, postController.updatePostById)
 
 // 刪除所有貼文
 router.delete('/posts', postController.deleteAllPosts)
 
 // 刪除貼文 By ID
-router.delete('/post/:id', postController.deletePostById)
+router.delete('/post/:id', isUser, postController.deletePostById)
 
 // 點讚貼文
-router.post('/post/:id/like', postController.createPostLike)
+router.post('/post/:id/like', isUser, postController.createPostLike)
 
 // 更新貼文點讚
-router.put('/post/:id/like', postController.updatePostLike)
+router.put('/post/:id/like', isUser, postController.updatePostLike)
 
 // 留言貼文
-router.post('/post/:id/comment', postController.createPostComment)
+router.post('/post/:id/comment', isUser, postController.createPostComment)
 
 // 更新留言貼文
-router.put('/post/:id/comment/:commentId', postController.updatePostComment)
+router.put(
+  '/post/:id/comment/:commentId',
+  isUser,
+  postController.updatePostComment
+)
 
 // 刪除留言貼文
-router.delete('/post/:id/comment/:commentId', postController.deletePostComment)
+router.delete(
+  '/post/:id/comment/:commentId',
+  isUser,
+  postController.deletePostComment
+)
 
 module.exports = router

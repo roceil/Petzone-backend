@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/userController')
+const { isUser } = require('../middleware/auth')
 
 router.get('/users', userController.getUserData)
 
@@ -21,7 +22,7 @@ router.put('/donatePointsById/:id', userController.donatePointsById)
 router.delete('/users', userController.deleteAllUsers)
 
 // 取得自己的 Id
-router.get('/selfId', userController.getSelfId)
+router.get('/selfId', isUser, userController.getSelfId)
 
 // 新增積分記錄
 router.post('/addPointsRecord', userController.addPointsRecord)
