@@ -66,7 +66,7 @@ async function userGetProduct(req, res) {
       return res.status(200).send({ message: '產品不存在' })
     }
 
-    return res.send({ product: productExist })
+    return res.send({ product: productExist[0] })
   } catch (err) {
     return res.status(400).send({ message: err.message })
   }

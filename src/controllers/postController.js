@@ -288,6 +288,15 @@ const deletePostComment = async (req, res) => {
   }
 }
 
+const getRandomPosts = async (req, res) => {
+  try {
+    const posts = await Post.aggregate([{ $sample: { size: 16 } }])
+    res.json(posts)
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 module.exports = {
   getAllTags,
   getAllPosts,
@@ -302,4 +311,5 @@ module.exports = {
   createPostComment,
   updatePostComment,
   deletePostComment,
+  getRandomPosts,
 }
