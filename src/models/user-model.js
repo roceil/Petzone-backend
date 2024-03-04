@@ -96,9 +96,11 @@ const userSchema = new mongoose.Schema(
     },
     historyPoints: {
       type: Number,
+      default: 0,
     },
     points: {
       type: Number,
+      default: 0,
     },
     pointsRecord: {
       type: [pointsRecordSchema],

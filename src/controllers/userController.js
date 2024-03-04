@@ -81,7 +81,6 @@ const updateUserInfoById = async (req, res) => {
       intro,
       historyPoints,
       points,
-      pointsRecord,
       cart,
       nickName,
       phone,
@@ -92,7 +91,6 @@ const updateUserInfoById = async (req, res) => {
     user.intro = intro || user.intro
     user.historyPoints = historyPoints || user.historyPoints
     user.points = points || user.points
-    user.pointsRecord = pointsRecord || user.pointsRecord
     user.cart = cart || user.cart
     user.nickName = nickName || user.nickName
     user.phone = phone || user.phone
@@ -100,6 +98,7 @@ const updateUserInfoById = async (req, res) => {
     await user.save()
     res.json(user)
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
@@ -187,6 +186,8 @@ const addPointsRecord = async (req, res) => {
 
     const { changePoints, reason } = req.body
 
+    console.log("findUser", user)
+
     // 寫入積分變動記錄
     const newRecord = {
       changePoints,
@@ -207,6 +208,7 @@ const addPointsRecord = async (req, res) => {
       newRecord,
     })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'something went wrong' })
   }
 }

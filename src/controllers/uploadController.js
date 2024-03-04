@@ -27,6 +27,7 @@ async function uploadImage(req, res) {
   });
 
   blobStream.on("error", (err) => {
+    console.error(err);
     res.status(500).send("上傳失敗");
   });
 
