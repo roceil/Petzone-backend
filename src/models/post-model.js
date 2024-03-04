@@ -14,10 +14,10 @@ const postSchema = new mongoose.Schema(
     },
     photos: {
       type: Array,
+      required: true,
     },
     content: {
       type: String,
-      required: true,
       // minLength: 3,
       maxLength: 255,
     },
@@ -54,14 +54,6 @@ const postSchema = new mongoose.Schema(
         },
       },
     ],
-    // createAt: {
-    //   type: Date,
-    //   default: Date.now,
-    // },
-    // updateAt: {
-    //   type: Date,
-    //   default: Date.now,
-    // },
   },
   { timestamps: true }
 )
