@@ -33,7 +33,10 @@ const productSchema = new Schema({
   unit: { type: String, required: true },
   description: { type: String, minLength: 3, maxLength: 255 },
   isEnabled: { type: Boolean, default: true, required: true },
-  review: { type: Array, default: [] },
+  review: {
+    type: Array,
+    default: [],
+  },
   createAt: { type: Number },
   updateAt: { type: Number },
 })
