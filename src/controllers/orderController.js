@@ -1,9 +1,15 @@
 const Order = require('../models/order-model')
 
+function generateRandomNumber() {
+  return Math.floor(100000 + Math.random() * 900000)
+}
+
 // 新增訂單並回傳訂單ID
 const createOrder = async (req, res) => {
   console.log(req.body)
-  const newOrder = new Order(req.body)
+  const newOrder = new Order({ orderId: generateRandomNumber(), ...req.body })
+  // console.log(newOrder)
+
   try {
     await newOrder.save()
     return res
