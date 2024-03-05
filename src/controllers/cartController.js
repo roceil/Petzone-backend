@@ -67,8 +67,36 @@ const updateCart = async (req, res) => {
   }
 }
 
+const deleteFromCart = async (req, res) => {
+  try {
+    console.log(req.params)
+
+    const userId = req.params.userId
+    const productId = req.params.productId
+    console.log(userId, productId)
+    User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { cart: { productId: productId } } },
+      { new: true }
+    )
+      .then((updatedUser) => {
+        if (updatedUser) {
+          return res.status(200).send({ message: '刪除購物車中該產品成功' })
+        } else {
+          console.log('未找到該用户或產品')
+        }
+      })
+      .catch((error) => {
+        console.error('刪除時出錯：', error)
+      })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+}
+
 module.exports = {
   addToCart,
   getCart,
   updateCart,
+  deleteFromCart,
 }

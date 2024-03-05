@@ -13,6 +13,6 @@ router.get('/cart/:userId', cartController.getCart)
 router.put('/cart/:userId', cartController.updateCart)
 
 // 刪除會員購物車資料
-// router.delete('/cart/:userId', cartController.deleteFromCart)
+router.delete('/cart/:userId/:productId', cartController.deleteFromCart)
 
 module.exports = router
