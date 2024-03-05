@@ -12,7 +12,10 @@ router.get('/cart/:userId', cartController.getCart)
 // 更新會員購物車資料
 router.put('/cart/:userId', cartController.updateCart)
 
-// 刪除會員購物車資料
+// 刪除會員購物車單一品項
 router.delete('/cart/:userId/:productId', cartController.deleteFromCart)
+
+// 清空會員購物車資料
+router.delete('/cart/:userId', cartController.deleteCart)
 
 module.exports = router

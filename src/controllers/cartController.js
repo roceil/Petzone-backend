@@ -25,6 +25,7 @@ const addToCart = async (req, res) => {
   }
 }
 
+// 取得會員購物車資料
 const getCart = async (req, res) => {
   // console.log(req.params)
 
@@ -38,6 +39,7 @@ const getCart = async (req, res) => {
   }
 }
 
+// 更新會員購物車資料
 const updateCart = async (req, res) => {
   try {
     // console.log(req.params, req.body)
@@ -67,6 +69,7 @@ const updateCart = async (req, res) => {
   }
 }
 
+// 刪除會員購物車單一品項
 const deleteFromCart = async (req, res) => {
   try {
     console.log(req.params)
@@ -94,9 +97,35 @@ const deleteFromCart = async (req, res) => {
   }
 }
 
+const deleteCart = async (req, res) => {
+  try {
+    console.log(req.params)
+
+    const userId = req.params.userId
+    User.findOneAndUpdate(
+      { _id: userId },
+      { $pull: { cart: {} } },
+      { new: true }
+    )
+      .then((updatedUser) => {
+        if (updatedUser) {
+          return res.status(200).send({ message: '刪除購物車成功' })
+        } else {
+          console.log('未找到該用户或產品')
+        }
+      })
+      .catch((error) => {
+        console.error('刪除時出錯：', error)
+      })
+  } catch (error) {
+    res.status(400).json({ message: error.message })
+  }
+}
+
 module.exports = {
   addToCart,
   getCart,
   updateCart,
   deleteFromCart,
+  deleteCart,
 }
