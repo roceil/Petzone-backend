@@ -16,6 +16,12 @@ router.post(
   productReviewController.userPostProductReview
 )
 
+// 前台取得商品評論
+router.get(
+  '/product/reviews/:productId',
+  productReviewController.getProductReviews
+)
+
 // 後台新增產品
 router.post('/product', productController.addProduct)
 
