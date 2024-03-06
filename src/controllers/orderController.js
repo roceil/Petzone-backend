@@ -59,14 +59,16 @@ const getAllOrders = async (req, res) => {
 }
 
 const getOrderByUserId = async (req, res) => {
+  console.log(req)
   const authCheck = await getTokenInfo(req)
   if (!authCheck) {
     return res.status(401).json({ message: 'Not authorized' })
   }
 
-  const userId = req.query.userId
+  const userId = req.params.id
+
   try {
-    const orders = await Order.find({ userId: userId })
+    const orders = await Order.find({ 'recipient.userId': userId })
     if (!orders.length) {
       return res.status(202).json({ message: '尚無訂單' })
     }
