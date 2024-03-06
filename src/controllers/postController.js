@@ -66,10 +66,21 @@ const getPostById = async (req, res) => {
 }
 
 const getPostsByUserId = async (req, res) => {
+  console.log(123)
   try {
-    const user = new mongoose.Types.ObjectId(req.params.userId)
+    const user = new mongoose.Types.ObjectId(`${req.params.userId}`)
+    console.log(1)
     const posts = await Post.find({ user })
-    res.json(posts)
+    console.log(2)
+    const returnPosts = posts.map((post) => {
+      return {
+        _id: post._id,
+        photo: post.photos[0],
+        likesLength: post.likes.length,
+        commentsLength: post.comments.length,
+      }
+    })
+    res.json(returnPosts)
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
