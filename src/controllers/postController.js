@@ -3,6 +3,7 @@ const mongoose = require('mongoose')
 const Post = require('../models/post-model')
 const User = require('../models/user-model')
 const { tags } = require('../lib/enum')
+const { updatePoints } = require('../lib/index')
 
 const getAllTags = async (req, res) => {
   res.json(tags)
@@ -66,12 +67,9 @@ const getPostById = async (req, res) => {
 }
 
 const getPostsByUserId = async (req, res) => {
-  console.log(123)
   try {
     const user = new mongoose.Types.ObjectId(`${req.params.userId}`)
-    console.log(1)
-    const posts = await Post.find({ user })
-    console.log(2)
+    const posts = await Post.find({ user }).sort({ createdAt: -1 })
     const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
@@ -105,6 +103,11 @@ const createPost = async (req, res) => {
       content,
     })
     await newPost.save()
+
+    // 更新積分
+    const user = await User.findById(userId)
+    updatePoints(user, 1, 5)
+
     res.json({ message: '新增貼文成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
@@ -186,6 +189,11 @@ const createPostLike = async (req, res) => {
       isLiked: true,
     })
     await post.save()
+
+    // 更新積分
+    const user = await User.findById(userId)
+    updatePoints(user, 2, 1)
+
     res.json({ message: '點讚成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
@@ -232,10 +240,15 @@ const createPostComment = async (req, res) => {
       _id: new mongoose.Types.ObjectId(),
       user: userId,
       content,
-      createAt: new Date().toISOString(),
-      updateAt: new Date().toISOString(),
+      createAt: new Date(),
+      updateAt: new Date(),
     })
     await post.save()
+
+    // 更新積分
+    const user = await User.findById(userId)
+    updatePoints(user, 3, 1)
+
     res.json({ message: '新增留言成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
@@ -266,7 +279,7 @@ const updatePostComment = async (req, res) => {
       user: post.comments[index].user,
       content,
       createAt: post.comments[index].createAt,
-      updateAt: new Date().toISOString(),
+      updateAt: new Date(),
     }
     await post.save()
     res.json({ message: '更新留言成功' })

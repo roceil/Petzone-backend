@@ -1,16 +1,8 @@
 const mongoose = require('mongoose')
+const { reasons } = require('../lib/enum')
 
 // 原因轉換器
-const reasonConverter = value => {
-  const reasons = {
-    1: '發文',
-    2: '按讚',
-    3: '留言',
-    4: '訂單紅利',
-    5: '訂單折抵',
-    6: '捐贈',
-  }
-
+const reasonConverter = (value) => {
   switch (value) {
     case 1:
       return reasons[1]
@@ -116,7 +108,7 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 )
 
 module.exports = mongoose.model('User', userSchema)
