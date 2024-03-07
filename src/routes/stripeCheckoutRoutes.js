@@ -3,7 +3,7 @@ const stripeCheckoutController = require('../controllers/stripeCheckoutControlle
 
 const router = express.Router()
 
-router.get(
+router.post(
   '/checkout-session/:orderId',
   stripeCheckoutController.getCheckoutSession
 )

@@ -1,34 +1,42 @@
-const { default: Stripe } = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 
 const getCheckoutSession = async (req, res) => {
   const { orderId } = req.params
-  console.log('🚀 ~ getCheckoutSession ~ orderId:', orderId)
+
+  const orderDetail = JSON.parse(JSON.stringify(req.body))
+  const orderListArray = orderDetail.body.order.products
+
+  const newOrderListArray = orderListArray.map((item) => {
+    return {
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: item.name,
+          images: item.photos,
+          description: item.description,
+        },
+
+        unit_amount: item.price * 100,
+      },
+      quantity: item.qty,
+    }
+  })
 
   try {
-    const session = await Stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      customer_email: req.user.email,
+    const session = await stripe.checkout.sessions.create({
       client_reference_id: orderId,
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: 'T-shirt',
-            },
-            unit_amount: 2000,
-          },
-          quantity: 1,
-        },
-      ],
-
+      line_items: newOrderListArray,
+      mode: 'payment',
       success_url: `${req.protocol}://${req.get('host')}/`,
       cancel_url: `${req.protocol}://${req.get(
         'host'
       )}/ecommerce/order/${orderId}`,
     })
-    res.status(200).json({ status: 'success', session })
+
+    res.json({ url: session.url })
   } catch (error) {
+    console.log('🚀 ~ getCheckoutSession ~ error:', error)
+
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
