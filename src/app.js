@@ -12,12 +12,16 @@ require('./configs/passport')
 const session = require('express-session')
 const passport = require('passport')
 
+
+
 // const userModel = require("./models/userModel");
 const userRoutes = require('./routes/userRoutes')
 const postRoutes = require('./routes/postRoutes')
 const productRoutes = require('./routes/productRoutes')
 const orderRoutes = require('./routes/orderRoutes')
+const stripeCheckoutRoutes = require('./routes/stripeCheckoutRoutes')
 const cartRoutes = require('./routes/cartRoutes')
+
 
 connectDB()
 
@@ -63,6 +67,7 @@ app.use('/api', userRoutes)
 app.use('/api', postRoutes)
 app.use('/api', productRoutes)
 app.use('/api', orderRoutes)
+app.use('/api', stripeCheckoutRoutes)
 app.use('/api', cartRoutes)
 app.use('/auth', require('./routes/auth'))
 
