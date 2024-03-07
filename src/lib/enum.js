@@ -32,7 +32,18 @@ const tags = [
 ]
 const tagsEnum = tags.map((item) => item.name)
 
+// 積分詳情
+const reasons = {
+  1: '發文',
+  2: '按讚',
+  3: '留言',
+  4: '訂單紅利',
+  5: '訂單折抵',
+  6: '捐贈',
+}
+
 module.exports = {
   tags,
   tagsEnum,
+  reasons,
 }
