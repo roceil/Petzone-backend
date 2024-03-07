@@ -27,10 +27,8 @@ const getCheckoutSession = async (req, res) => {
       client_reference_id: orderId,
       line_items: newOrderListArray,
       mode: 'payment',
-      success_url: `${req.protocol}://${req.get('host')}/`,
-      cancel_url: `${req.protocol}://${req.get(
-        'host'
-      )}/ecommerce/order/${orderId}`,
+      success_url: `${process.env.CLIENT_URL}/`,
+      cancel_url: `${process.env.CLIENT_URL}/ecommerce/order/${orderId}`,
     })
 
     res.json({ url: session.url })
