@@ -13,30 +13,34 @@ function category(val) {
     8: { type: 'all', name: '生活用品 & 玩具' },
   }
 
-  if (categoryList.hasOwnProperty(val)) {
+  if (Object.prototype.hasOwnProperty.call(categoryList, val)) {
     return categoryList[val]
   } else {
     return null
   }
 }
 
-const productSchema = new Schema({
-  name: { type: String, required: true },
-  category: {
-    type: Object,
-    set: category,
+const productSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    category: {
+      type: Object,
+      set: category,
+    },
+    photos: { type: Array, default: [] },
+    originPrice: { type: Number, required: true },
+    price: { type: Number },
+    quantity: { type: Number, required: true },
+    unit: { type: String, required: true },
+    description: { type: String, minLength: 3, maxLength: 255 },
+    isEnabled: { type: Boolean, default: true, required: true },
+    review: {
+      type: Array,
+      default: [],
+    },
   },
-  photos: { type: Array, default: [] },
-  originPrice: { type: Number, required: true },
-  price: { type: Number },
-  quantity: { type: Number, required: true },
-  unit: { type: String, required: true },
-  description: { type: String, minLength: 3, maxLength: 255 },
-  isEnabled: { type: Boolean, default: true, required: true },
-  review: { type: Array, default: [] },
-  createAt: { type: Number },
-  updateAt: { type: Number },
-})
+  { timestamps: true }
+)
 
 const Product = mongoose.model('Product', productSchema)
 module.exports = Product

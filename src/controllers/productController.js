@@ -66,7 +66,7 @@ async function userGetProduct(req, res) {
       return res.status(200).send({ message: '產品不存在' })
     }
 
-    return res.send({ product: productExist })
+    return res.send({ product: productExist[0] })
   } catch (err) {
     return res.status(400).send({ message: err.message })
   }
@@ -75,23 +75,16 @@ async function userGetProduct(req, res) {
 // 後台新增產品
 async function addProduct(req, res) {
   console.log(req.body)
-  let product = req.body
+  const product = req.body
   try {
     const productExist = await Product.findOne({ name: product.name }).exec()
 
     if (!productExist) {
-      const newProductData = { ...product, createAt: new Date().getTime() }
-      console.log(newProductData)
-      const newProduct = new Product({ ...newProductData })
-
+      const newProduct = new Product({ product })
       await newProduct.save()
-      return res.status(200).send({
-        message: '新增產品成功',
-      })
+      return res.status(200).send({ message: '新增產品成功' })
     } else {
-      return res.status(200).send({
-        message: '該產品已存在',
-      })
+      return res.status(200).send({ message: '該產品已存在' })
     }
   } catch (err) {
     return res.status(400).send({ message: err.message })

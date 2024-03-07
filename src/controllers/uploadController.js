@@ -27,7 +27,7 @@ async function uploadImage(req, res) {
   })
 
   blobStream.on('error', (err) => {
-    res.status(500).send('上傳失敗')
+    res.status(500).send('上傳失敗:' + err)
   })
 
   // 將檔案的 buffer 寫入 blobStream
