@@ -1,13 +1,17 @@
 const User = require('../models/user-model')
+const { getTokenInfo } = require('../lib')
 
 // 購物車資料存入會員資料
 const addToCart = async (req, res) => {
+  const authCheck = await getTokenInfo(req)
+  if (!authCheck) {
+    return res.status(401).json({ message: 'Not authorized' })
+  }
+
+  console.log(req.params, req.body)
+  const userId = req.params.userId
+  const newCart = { cart: req.body }
   try {
-    // console.log(req.params, req.body)
-
-    const userId = req.params.userId
-    const newCart = { cart: req.body }
-
     User.findByIdAndUpdate(userId, newCart, { new: true })
       .exec()
       .then((updatedUser) => {
@@ -18,36 +22,43 @@ const addToCart = async (req, res) => {
         }
       })
       .catch((error) => {
-        console.error('更新时出错：', error)
+        console.error('更新時出错：', error)
       })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // 取得會員購物車資料
 const getCart = async (req, res) => {
-  // console.log(req.params)
+  const authCheck = await getTokenInfo(req)
+  if (!authCheck) {
+    return res.status(401).json({ message: 'Not authorized' })
+  }
 
+  console.log(req.params)
   const userId = req.params.userId
-
   try {
     const UserExist = await User.findOne({ _id: userId }).exec()
     return res.status(200).send(UserExist.cart)
   } catch (err) {
-    return res.status(400).send({ message: err.message })
+    return res.status(500).send({ message: err.message })
   }
 }
 
 // 更新會員購物車資料
 const updateCart = async (req, res) => {
-  try {
-    // console.log(req.params, req.body)
+  const authCheck = await getTokenInfo(req)
+  if (!authCheck) {
+    return res.status(401).json({ message: 'Not authorized' })
+  }
 
-    const userId = req.params.userId
-    const productId = req.body.productId
-    const newQty = req.body.qty
-    console.log(userId, productId, newQty)
+  console.log(req.params, req.body)
+  const userId = req.params.userId
+  const productId = req.body.productId
+  const newQty = req.body.qty
+  console.log(userId, productId, newQty)
+  try {
     User.findOneAndUpdate(
       { _id: userId, 'cart.productId': productId },
       { $set: { 'cart.$.qty': newQty } },
@@ -62,21 +73,25 @@ const updateCart = async (req, res) => {
         }
       })
       .catch((error) => {
-        console.error('更新时出錯：', error)
+        return res.status(500).send('更新時出錯：', error.message)
       })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
 // 刪除會員購物車單一品項
 const deleteFromCart = async (req, res) => {
-  try {
-    console.log(req.params)
+  const authCheck = await getTokenInfo(req)
+  if (!authCheck) {
+    return res.status(401).json({ message: 'Not authorized' })
+  }
 
-    const userId = req.params.userId
-    const productId = req.params.productId
-    console.log(userId, productId)
+  console.log(req.params)
+  const userId = req.params.userId
+  const productId = req.params.productId
+  console.log(userId, productId)
+  try {
     User.findOneAndUpdate(
       { _id: userId },
       { $pull: { cart: { productId: productId } } },
@@ -90,18 +105,23 @@ const deleteFromCart = async (req, res) => {
         }
       })
       .catch((error) => {
-        console.error('刪除時出錯：', error)
+        console.error('刪除時出錯：', error.message)
       })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 
+// 刪除會員購物車
 const deleteCart = async (req, res) => {
-  try {
-    console.log(req.params)
+  const authCheck = await getTokenInfo(req)
+  if (!authCheck) {
+    return res.status(401).json({ message: 'Not authorized' })
+  }
 
-    const userId = req.params.userId
+  console.log(req.params)
+  const userId = req.params.userId
+  try {
     User.findOneAndUpdate(
       { _id: userId },
       { $pull: { cart: {} } },
@@ -115,10 +135,10 @@ const deleteCart = async (req, res) => {
         }
       })
       .catch((error) => {
-        console.error('刪除時出錯：', error)
+        console.error('刪除時出錯：', error.message)
       })
   } catch (error) {
-    res.status(400).json({ message: error.message })
+    res.status(500).json({ message: error.message })
   }
 }
 

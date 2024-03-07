@@ -22,6 +22,18 @@ router.get(
   productReviewController.getProductReviews
 )
 
+// 前台會員更新商品評論
+router.put(
+  '/product/review/:productId/:userId',
+  productReviewController.userUpdateProductReview
+)
+
+// 前台會員刪除商品評價
+router.delete(
+  '/product/review/:productId/:userId',
+  productReviewController.userDeleteProductReview
+)
+
 // 後台新增產品
 router.post('/product', productController.addProduct)
 
