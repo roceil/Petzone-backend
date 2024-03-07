@@ -7,6 +7,8 @@ const getCheckoutSession = async (req, res) => {
   try {
     const session = await Stripe.checkout.sessions.create({
       payment_method_types: ['card'],
+      customer_email: req.user.email,
+      client_reference_id: orderId,
       line_items: [
         {
           price_data: {
@@ -19,13 +21,13 @@ const getCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      mode: 'payment',
+
       success_url: `${req.protocol}://${req.get('host')}/`,
       cancel_url: `${req.protocol}://${req.get(
         'host'
       )}/ecommerce/order/${orderId}`,
     })
-    res.json({ session })
+    res.status(200).json({ status: 'success', session })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }

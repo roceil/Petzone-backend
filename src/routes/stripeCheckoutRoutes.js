@@ -4,7 +4,7 @@ const stripeCheckoutController = require('../controllers/stripeCheckoutControlle
 const router = express.Router()
 
 router.get(
-  'checkout-session/:orderId',
+  '/checkout-session/:orderId',
   stripeCheckoutController.getCheckoutSession
 )
 
