@@ -26,7 +26,7 @@ async function userGetProducts(req, res) {
   } else if (Object.keys(req.query)[0] === 'name') {
     try {
       const Allproduct = await Product.find({
-        name: req.query.name,
+        name: { $regex: req.query.name, $options: 'i' },
         isEnabled: true,
       }).exec()
       if (Allproduct.length === 0) {
