@@ -1,39 +1,64 @@
 const mongoose = require('mongoose')
-const { Schema } = mongoose
 
-function category(val) {
-  const categoryList = {
-    1: { type: 'dog', name: '狗狗主食' },
-    2: { type: 'dog', name: '狗狗零食' },
-    3: { type: 'dog', name: '貓貓主食' },
-    4: { type: 'cat', name: '貓貓零食' },
-    5: { type: 'cat', name: '貓砂系列' },
-    6: { type: 'all', name: '保健系列' },
-    7: { type: 'all', name: '沐浴 & 清潔' },
-    8: { type: 'all', name: '生活用品 & 玩具' },
-  }
-
-  if (Object.prototype.hasOwnProperty.call(categoryList, val)) {
-    return categoryList[val]
-  } else {
-    return null
-  }
+const categoryList = {
+  1: { type: 'dog', name: '狗狗主食' },
+  2: { type: 'dog', name: '狗狗零食' },
+  3: { type: 'dog', name: '狗狗玩具 & 用品' },
+  4: { type: 'dog', name: '貓貓主食' },
+  5: { type: 'cat', name: '貓貓零食' },
+  6: { type: 'cat', name: '貓貓玩具 & 用品' },
+  7: { type: 'cat', name: '貓砂系列' },
+  8: { type: 'all', name: '保健系列' },
+  9: { type: 'all', name: '清潔系列' },
+  10: { type: 'all', name: '通用玩具 & 用品' },
 }
 
-const productSchema = new Schema(
+function category(val) {
+  return categoryList[val] || null
+}
+
+const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
+    name: {
+      type: String,
+      required: true,
+    },
     category: {
       type: Object,
       set: category,
     },
-    photos: { type: Array, default: [] },
-    originPrice: { type: Number, required: true },
-    price: { type: Number },
-    quantity: { type: Number, required: true },
-    unit: { type: String, required: true },
-    description: { type: String, minLength: 3, maxLength: 255 },
-    isEnabled: { type: Boolean, default: true, required: true },
+    photos: {
+      type: Array,
+      default: [],
+    },
+    originPrice: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
+    price: {
+      type: Number,
+    },
+    quantity: {
+      type: Number,
+      required: true,
+      trim: true,
+    },
+    unit: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      minLength: 3,
+      maxLength: 255,
+    },
+    isEnabled: {
+      type: Boolean,
+      required: true,
+      default: true,
+    },
     review: {
       type: Array,
       default: [],
