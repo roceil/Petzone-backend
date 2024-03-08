@@ -8,17 +8,16 @@ function generateRandomNumber() {
 // 新增訂單並回傳訂單ID
 const createOrder = async (req, res) => {
   console.log(req.body)
-  const newOrder = new Order({ orderId: generateRandomNumber(), ...req.body })
-  // console.log(newOrder)
-
   try {
+    const newOrder = new Order({ orderId: generateRandomNumber(), ...req.body })
+    // console.log(newOrder)
     await newOrder.save()
     return res
       .status(200)
       .send({ message: '訂單新增成功', orderId: newOrder._id })
   } catch (error) {
     console.log(error)
-    return res.status(400).send({ message: error.message })
+    return res.status(500).send({ message: error.message })
   }
 }
 
@@ -32,12 +31,12 @@ const getOrderByOrderId = async (req, res) => {
     }).exec()
 
     if (orderExist.length === 0) {
-      return res.status(200).json({ message: '找不到該筆訂單' })
+      return res.status(400).json({ message: '找不到該筆訂單' })
     }
 
-    return res.send({ order: orderExist })
+    return res.status(200).send({ order: orderExist })
   } catch (err) {
-    return res.status(400).send({ message: err.message })
+    return res.status(500).send({ message: err.message })
   }
 }
 
