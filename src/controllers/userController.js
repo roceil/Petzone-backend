@@ -99,13 +99,10 @@ const updateUserInfo = async (req, res) => {
   }
 }
 
-const donatePointsById = async (req, res) => {
+const donatePoints = async (req, res) => {
   try {
-    const authCheck = await getTokenInfo(req)
-    if (!authCheck) {
-      return res.status(401).json({ message: 'Not authorized' })
-    }
-    const user = await User.findById(req.params.id)
+    const { userId } = req
+    const user = await User.findById(userId)
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
     }
@@ -241,7 +238,7 @@ module.exports = {
   getUserInfo,
   getUserInfoById,
   updateUserInfo,
-  donatePointsById,
+  donatePoints,
   deleteAllUsers,
   addPointsRecord,
   getBestDonator,
