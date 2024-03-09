@@ -18,8 +18,8 @@ router.get('/userInfo/:id', userController.getUserInfoById)
 // 修改自己的個人資料
 router.patch('/userInfo', isUser, userController.updateUserInfo)
 
-// 捐贈個人點數 By ID
-router.put('/donatePointsById/:id', userController.donatePointsById)
+// 捐贈個人點數
+router.put('/donatePoints', isUser, userController.donatePoints)
 
 // 刪除所有用戶
 router.delete('/users', userController.deleteAllUsers)
