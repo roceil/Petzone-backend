@@ -162,7 +162,6 @@ const handleCheckLoginSuccess = (req, res) => {
       process.env.ACCESS_TOKEN_SECRET
     )
 
-    req.user.token = accessToken
     res
       .cookie('accessToken', accessToken, {
         httpOnly: true,
@@ -174,6 +173,7 @@ const handleCheckLoginSuccess = (req, res) => {
         message: 'Successfully Logged In',
 
         user: req.user,
+        token: accessToken,
       })
   } else {
     res.status(403).json({ error: true, message: 'Not Authorized' })
