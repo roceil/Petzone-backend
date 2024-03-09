@@ -162,6 +162,7 @@ const handleCheckLoginSuccess = (req, res) => {
       process.env.ACCESS_TOKEN_SECRET
     )
 
+    req.user.token = accessToken
     res
       .cookie('accessToken', accessToken, {
         httpOnly: true,
