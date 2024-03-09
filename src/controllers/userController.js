@@ -46,13 +46,24 @@ const getUsersInfo = async (req, res) => {
   }
 }
 
+const getUserInfo = async (req, res) => {
+  try {
+    const { userId } = req
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).json({ message: '沒有匹配的用戶ID' })
+    }
+    res.json(user)
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 const getUserInfoById = async (req, res) => {
   try {
-    const authCheck = await getTokenInfo(req)
-    if (!authCheck) {
-      return res.status(401).json({ message: 'Not authorized' })
-    }
-    const user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id).select(
+      '_id photo nickName intro'
+    )
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
     }
@@ -63,29 +74,22 @@ const getUserInfoById = async (req, res) => {
   }
 }
 
-const updateUserInfoById = async (req, res) => {
+const updateUserInfo = async (req, res) => {
   try {
-    const authCheck = await getTokenInfo(req)
-    if (!authCheck) {
-      return res.status(401).json({ message: 'Not authorized' })
-    }
-
-    const user = await User.findById(req.params.id)
+    const { userId } = req
+    const user = await User.findById(userId)
     if (!user) {
       return res.status(400).json({ message: '沒有匹配的用戶ID' })
     }
 
-    const { name, photo, intro, historyPoints, points, cart, nickName, phone } =
-      req.body
+    const { name, photo, intro, nickName, phone, address } = req.body
 
     user.name = name || user.name
     user.photo = photo || user.photo
     user.intro = intro || user.intro
-    user.historyPoints = historyPoints || user.historyPoints
-    user.points = points || user.points
-    user.cart = cart || user.cart
     user.nickName = nickName || user.nickName
     user.phone = phone || user.phone
+    user.address = address || user.address
 
     await user.save()
     res.json(user)
@@ -143,15 +147,6 @@ const deleteAllUsers = async (req, res) => {
 
     await User.deleteMany()
     res.json({ message: '刪除所有用戶成功' })
-  } catch (error) {
-    res.status(500).json({ message: 'something went wrong' })
-  }
-}
-
-const getSelfId = async (req, res) => {
-  try {
-    const { userId } = req
-    res.json(userId)
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
   }
@@ -243,11 +238,11 @@ const getBestDonator = async (req, res) => {
 module.exports = {
   getUserData,
   getUsersInfo,
+  getUserInfo,
   getUserInfoById,
-  updateUserInfoById,
+  updateUserInfo,
   donatePointsById,
   deleteAllUsers,
-  getSelfId,
   addPointsRecord,
   getBestDonator,
 }
