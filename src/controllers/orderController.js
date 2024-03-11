@@ -1,4 +1,5 @@
 const Order = require('../models/order-model')
+const User = require('../models/user-model')
 const { getTokenInfo } = require('../lib')
 
 function generateRandomNumber() {
@@ -7,11 +8,29 @@ function generateRandomNumber() {
 
 // 新增訂單並回傳訂單ID
 const createOrder = async (req, res) => {
-  console.log(req.body)
   try {
     const newOrder = new Order({ orderId: generateRandomNumber(), ...req.body })
     // console.log(newOrder)
     await newOrder.save()
+
+    // 如為會員使用積分折抵存入會員資料
+    if (req.body.pointsDiscount !== 0) {
+      const userId = req.body.recipient.userId
+      const currentUser = await User.findById({ _id: userId })
+
+      const usedPoints = -req.body.pointsDiscount * 10
+      currentUser.pointsRecord.push({
+        changePoints: -usedPoints,
+        reason: 5,
+        beforePoints: currentUser.points,
+        afterPoints: currentUser.points - usedPoints,
+        createAt: new Date(),
+      })
+      currentUser.points -= usedPoints
+
+      await currentUser.save()
+    }
+
     return res
       .status(200)
       .send({ message: '訂單新增成功', orderId: newOrder._id })
