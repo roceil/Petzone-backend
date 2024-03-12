@@ -105,6 +105,12 @@ async function addProduct(req, res) {
 async function getProducts(req, res) {
   console.log(req.query)
   let products
+  let pagination
+
+  const totalCount = await Product.countDocuments()
+  console.log('Total count:', totalCount)
+  pagination = Math.ceil(totalCount / 5)
+  console.log(pagination)
 
   try {
     if (
@@ -137,6 +143,7 @@ async function getProducts(req, res) {
     }
 
     res.status(200).json({
+      pagination,
       results: products.length,
       data: { products },
     })
