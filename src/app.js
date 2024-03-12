@@ -12,8 +12,6 @@ require('./configs/passport')
 const session = require('express-session')
 const passport = require('passport')
 
-
-
 // const userModel = require("./models/userModel");
 const userRoutes = require('./routes/userRoutes')
 const postRoutes = require('./routes/postRoutes')
@@ -21,7 +19,6 @@ const productRoutes = require('./routes/productRoutes')
 const orderRoutes = require('./routes/orderRoutes')
 const stripeCheckoutRoutes = require('./routes/stripeCheckoutRoutes')
 const cartRoutes = require('./routes/cartRoutes')
-
 
 connectDB()
 
