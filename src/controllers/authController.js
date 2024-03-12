@@ -154,11 +154,12 @@ const handleLogout = async (req, res, next) => {
   res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
 }
 
-const handleCheckLoginSuccess = (req, res) => {
-  if (req.user) {
+const handleCheckLoginSuccess = async (req, res) => {
+  console.log(req.cookies.userId)
+  if (req.cookies.userId) {
     const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
-      { id: req.user._id },
+      { id: req.cookies.userId },
       process.env.ACCESS_TOKEN_SECRET
     )
 
@@ -171,8 +172,7 @@ const handleCheckLoginSuccess = (req, res) => {
       .json({
         error: false,
         message: 'Successfully Logged In',
-
-        user: req.user,
+        user: { _id: req.cookies.userId, photo: req.cookies.userPhotoPath },
         token: accessToken,
       })
   } else {
