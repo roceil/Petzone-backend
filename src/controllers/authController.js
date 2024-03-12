@@ -155,8 +155,27 @@ const handleLogout = async (req, res, next) => {
 }
 
 const handleCheckLoginSuccess = async (req, res) => {
-  console.log(req.cookies.userId)
-  if (req.cookies.userId) {
+  console.log(req.user, req.cookies.userId)
+  if (req.user) {
+    const expiryDate = new Date(Date.now() + 3600000) // 1 hour
+    const accessToken = jwt.sign(
+      { id: req.user._id },
+      process.env.ACCESS_TOKEN_SECRET
+    )
+
+    res
+      .cookie('accessToken', accessToken, {
+        httpOnly: true,
+        expires: expiryDate,
+      })
+      .status(200)
+      .json({
+        error: false,
+        message: 'Successfully Logged In',
+        user: req.user,
+        token: accessToken,
+      })
+  } else if (req.cookies.userId) {
     const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
       { id: req.cookies.userId },
