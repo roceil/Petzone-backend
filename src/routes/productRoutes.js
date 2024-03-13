@@ -34,20 +34,20 @@ router.delete(
   productReviewController.userDeleteProductReview
 )
 
-// 後台新增產品
-router.post('/product', productController.addProduct)
-
-// 後台刪除產品
-router.delete('/product/:productId', productController.deleteProduct)
-
-// 後台更新產品
-router.put('/product/:productId', productController.updateProduct)
-
 // 後台取得全部產品資訊
 router.get('/products/admin', productController.getProducts)
 
 // 後台取得單一產品資訊
 router.get('/product/admin/:productId', productController.getProduct)
+
+// 後台新增產品
+router.post('/product', productController.addProduct)
+
+// 後台更新產品
+router.put('/product/:productId', productController.updateProduct)
+
+// 後台刪除產品
+router.delete('/product/:productId', productController.deleteProduct)
 
 // 上傳單張照片
 router.post(

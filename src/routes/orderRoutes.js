@@ -9,8 +9,9 @@ router.post('/order', orderController.createOrder)
 // 取得訂單 By ID
 router.get('/order/:id', orderController.getOrderByOrderId)
 
-// 取得定單 By User ID
+// 取得訂單 By User ID
 router.get('/order/user/:id', orderController.getOrderByUserId)
+
 // 取得所有訂單
 router.get('/orders', orderController.getAllOrders)
 
