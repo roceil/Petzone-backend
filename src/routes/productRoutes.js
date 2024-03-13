@@ -16,7 +16,7 @@ router.post(
   productReviewController.userPostProductReview
 )
 
-// 前台取得商品評論
+// 前台、後台取得商品評論
 router.get(
   '/product/reviews/:productId',
   productReviewController.getProductReviews
@@ -48,6 +48,12 @@ router.put('/product/:productId', productController.updateProduct)
 
 // 後台刪除產品
 router.delete('/product/:productId', productController.deleteProduct)
+
+// 後台刪除商品評價
+router.delete(
+  '/product/admin/review/:productId/:userId',
+  productReviewController.deleteProductReview
+)
 
 // 上傳單張照片
 router.post(

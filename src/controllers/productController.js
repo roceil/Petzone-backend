@@ -216,7 +216,7 @@ async function updateProduct(req, res) {
         }
       ).exec()
       await updateProduct.save()
-      return res.status(200).send({ message: '已更新產品' })
+      return res.status(200).send({ message: '更新產品成功' })
     } else {
       return res.status(400).send({ message: '該產品不存在' })
     }
