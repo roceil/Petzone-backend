@@ -2,6 +2,7 @@ const User = require('../models/user-model')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 
+// 一般登入
 const handleSignIn = async (req, res) => {
   try {
     const { email, password } = req.body
@@ -154,13 +155,21 @@ const handleLogout = async (req, res, next) => {
   res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
 }
 
+// google登入成功及檢查是否登入
 const handleCheckLoginSuccess = async (req, res) => {
-  console.log(req.user, req.cookies.userId)
   if (req.user) {
+    console.log(req.user)
     const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
-      { id: req.user._id },
-      process.env.ACCESS_TOKEN_SECRET
+      {
+        UserInfo: {
+          userId: req.user.id,
+          username: req.user.name,
+        },
+      },
+
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1d' }
     )
 
     res
@@ -172,14 +181,23 @@ const handleCheckLoginSuccess = async (req, res) => {
       .json({
         error: false,
         message: 'Successfully Logged In',
-        user: req.user,
         token: accessToken,
+        user: req.user,
       })
   } else if (req.cookies.userId) {
+    console.log(req.cookies)
+    const foundUser = await User.findOne({ _id: req.cookies.userId }).exec()
     const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
-      { id: req.cookies.userId },
-      process.env.ACCESS_TOKEN_SECRET
+      {
+        UserInfo: {
+          userId: req.cookies.userId,
+          username: foundUser.name,
+        },
+      },
+
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '1d' }
     )
 
     res
@@ -191,8 +209,8 @@ const handleCheckLoginSuccess = async (req, res) => {
       .json({
         error: false,
         message: 'Successfully Logged In',
-        user: { _id: req.cookies.userId, photo: req.cookies.userPhotoPath },
         token: accessToken,
+        user: { _id: req.cookies.userId, photo: req.cookies.userPhotoPath },
       })
   } else {
     res.status(403).json({ error: true, message: 'Not Authorized' })
