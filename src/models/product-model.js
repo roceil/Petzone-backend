@@ -30,15 +30,16 @@ const productSchema = new mongoose.Schema(
     category: {
       type: Object,
       set: category,
+      required: true,
     },
     photos: {
       type: Array,
       default: [],
+      required: true,
     },
     originPrice: {
       type: Number,
       required: true,
-      trim: true,
     },
     price: {
       type: Number,
@@ -46,22 +47,20 @@ const productSchema = new mongoose.Schema(
     quantity: {
       type: Number,
       required: true,
-      trim: true,
     },
     unit: {
       type: String,
       required: true,
-      trim: true,
     },
     description: {
       type: String,
       minLength: 3,
       maxLength: 255,
+      required: true,
     },
     isEnabled: {
       type: Boolean,
       required: true,
-      default: true,
     },
     review: {
       type: Array,

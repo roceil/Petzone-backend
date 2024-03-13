@@ -1,9 +1,29 @@
-const { query } = require('express')
 const Product = require('../models/product-model')
 const APIFeatures = require('../utils/apiFeatures')
 
 function generateRandomNumber() {
   return Math.floor(100000 + Math.random() * 900000)
+}
+
+const categoryList = {
+  1: { type: 'dog', name: '狗狗主食' },
+  2: { type: 'dog', name: '狗狗零食' },
+  3: { type: 'dog', name: '狗狗玩具與用品' },
+  4: { type: 'dog', name: '貓貓主食' },
+  5: { type: 'cat', name: '貓貓零食' },
+  6: { type: 'cat', name: '貓貓玩具與用品' },
+  7: { type: 'cat', name: '貓砂系列' },
+  8: { type: 'all', name: '保健系列' },
+  9: { type: 'all', name: '清潔系列' },
+  10: { type: 'all', name: '通用玩具與生活用品' },
+}
+
+function category(name) {
+  const key = Object.keys(categoryList).find(
+    (key) => categoryList[key].name === name
+  )
+
+  return key ? key : null
 }
 
 // 前台取得全部產品資訊
@@ -78,29 +98,6 @@ async function userGetProduct(req, res) {
   }
 }
 
-// 後台新增產品
-async function addProduct(req, res) {
-  const product = req.body
-
-  try {
-    const productExist = await Product.findOne({ name: product.name }).exec()
-
-    if (!productExist) {
-      const newProduct = new Product({
-        productId: generateRandomNumber(),
-        ...product,
-      }).save()
-      await newProduct
-      return res.status(200).send({ message: '新增產品成功' })
-    } else {
-      return res.status(400).send({ message: '該產品已存在' })
-    }
-  } catch (err) {
-    console.log(err.message)
-    return res.status(500).send({ message: err.message })
-  }
-}
-
 // 後台取得全部產品資訊
 async function getProducts(req, res) {
   console.log(req.query)
@@ -137,9 +134,11 @@ async function getProducts(req, res) {
 
     if (!products.length) {
       console.log('查無相關商品')
-      return res
-        .status(200)
-        .send({ results: products.length, message: '查無相關商品' })
+      return res.status(200).send({
+        pagination: 0,
+        results: products.length,
+        message: '查無相關商品',
+      })
     }
 
     res.status(200).json({
@@ -164,8 +163,36 @@ async function getProduct(req, res) {
       return res.status(400).send({ message: '產品不存在' })
     }
 
-    return res.status(200).send({ product: productExist })
+    const categoryKey = category(productExist[0].category.name)
+    productExist[0].category.key = categoryKey
+    console.log(productExist[0].category)
+
+    return res.status(200).send({ product: productExist[0] })
   } catch (err) {
+    return res.status(500).send({ message: err.message })
+  }
+}
+
+// 後台新增產品
+async function addProduct(req, res) {
+  console.log(req.body)
+  const product = req.body
+
+  try {
+    const productExist = await Product.findOne({ name: product.name }).exec()
+
+    if (!productExist) {
+      const newProduct = new Product({
+        productId: generateRandomNumber(),
+        ...product,
+      }).save()
+      await newProduct
+      return res.status(200).send({ message: '新增產品成功' })
+    } else {
+      return res.status(400).send({ message: '該產品已存在' })
+    }
+  } catch (err) {
+    console.log(err.message)
     return res.status(500).send({ message: err.message })
   }
 }
