@@ -51,7 +51,7 @@ async function userPostProductReview(req, res) {
   }
 }
 
-// 取得產品評論
+// 前台、後台取得商品評論
 async function getProductReviews(req, res) {
   console.log(req.params)
   const productId = req.params.productId
@@ -155,9 +155,40 @@ async function userDeleteProductReview(req, res) {
   }
 }
 
+// 後台刪除產品評論
+async function deleteProductReview(req, res) {
+  console.log(req.params, req.body)
+  const productId = req.params.productId
+  const userId = req.params.userId
+  try {
+    const currentProduct = await Product.findOne({ _id: productId }).exec()
+    if (currentProduct.length === 0) {
+      console.log('找不到該產品')
+    }
+
+    Product.findOneAndUpdate(
+      { _id: productId, 'review.userId': userId },
+      { $pull: { review: { userId: userId } } },
+      { new: true }
+    )
+      .exec()
+      .then((deleteReview) => {
+        if (deleteReview) {
+          return res.status(200).send({ message: '成功刪除商品評論' })
+        }
+      })
+      .catch((error) => {
+        console.error('刪除時出錯：', error.message)
+      })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
 module.exports = {
   userPostProductReview,
   getProductReviews,
   userUpdateProductReview,
   userDeleteProductReview,
+  deleteProductReview,
 }
