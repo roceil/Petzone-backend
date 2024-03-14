@@ -3,6 +3,7 @@ const router = express.Router()
 const productController = require('../controllers/productController')
 const productReviewController = require('../controllers/productReviewController')
 const uploadController = require('../controllers/uploadController')
+const { isUser } = require('../middleware/auth')
 
 // 前台取得全部產品資訊
 router.get('/products', productController.userGetProducts)
@@ -13,6 +14,7 @@ router.get('/product/:productId', productController.userGetProduct)
 // 前台會員新增商品評論
 router.post(
   '/product/review/:productId',
+  isUser,
   productReviewController.userPostProductReview
 )
 
@@ -25,12 +27,14 @@ router.get(
 // 前台會員更新商品評論
 router.put(
   '/product/review/:productId/:userId',
+  isUser,
   productReviewController.userUpdateProductReview
 )
 
 // 前台會員刪除商品評價
 router.delete(
   '/product/review/:productId/:userId',
+  isUser,
   productReviewController.userDeleteProductReview
 )
 

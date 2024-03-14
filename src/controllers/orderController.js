@@ -1,5 +1,6 @@
 const Order = require('../models/order-model')
 const User = require('../models/user-model')
+const APIFeatures = require('../utils/apiFeatures')
 const { getTokenInfo } = require('../lib')
 
 function generateRandomNumber() {
@@ -40,7 +41,7 @@ const createOrder = async (req, res) => {
   }
 }
 
-//取得單一訂單資訊
+// 取得單一訂單資訊
 const getOrderByOrderId = async (req, res) => {
   const orderId = req.params.id
 
@@ -59,23 +60,7 @@ const getOrderByOrderId = async (req, res) => {
   }
 }
 
-const getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find()
-    if (!orders.length) {
-      return res.status(202).json({ message: '尚無訂單' })
-    }
-
-    res.json({
-      status: 'success',
-      totalOrders: orders.length,
-      orders,
-    })
-  } catch (error) {
-    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
-  }
-}
-
+// 會員取得訂單 By User ID
 const getOrderByUserId = async (req, res) => {
   console.log(req)
   const authCheck = await getTokenInfo(req)
@@ -95,6 +80,60 @@ const getOrderByUserId = async (req, res) => {
       status: 'success',
       totalOrders: orders.length,
       orders,
+    })
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+// 後台取得全部訂單資訊
+const getAllOrders = async (req, res) => {
+  console.log(req.query)
+  console.log(typeof req.query.status)
+
+  if (req.query.status) {
+    req.query.status = parseInt(req.query.status)
+  }
+
+  let orders
+  let pagination
+
+  const totalCount = await Order.countDocuments()
+  console.log('Total count:', totalCount)
+  pagination = Math.ceil(totalCount / 5)
+  console.log(pagination)
+
+  try {
+    if (
+      Object.keys(req.query).length > 0 &&
+      Object.values(req.query).every((value) => value !== '' && value !== null)
+    ) {
+      const features = new APIFeatures(Order.find(), req.query)
+        .filter()
+        .sort()
+        .limitFields()
+        .paginate()
+
+      orders = await features.query
+
+      console.log(orders)
+    } else {
+      orders = await Order.find({}).exec()
+    }
+
+    if (!orders.length) {
+      console.log('查無相關訂單')
+      return res.status(200).send({
+        pagination: 0,
+        results: orders.length,
+        message: '查無相關訂單',
+      })
+    }
+
+    res.status(200).json({
+      pagination,
+      results: orders.length,
+      data: { orders },
     })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
