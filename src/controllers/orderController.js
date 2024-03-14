@@ -88,38 +88,22 @@ const getOrderByUserId = async (req, res) => {
 
 // 後台取得全部訂單資訊
 const getAllOrders = async (req, res) => {
-  console.log(req.query)
-  console.log(typeof req.query.status)
-
-  if (req.query.status) {
-    req.query.status = parseInt(req.query.status)
-  }
-
-  let orders
-  let pagination
-
-  const totalCount = await Order.countDocuments()
-  console.log('Total count:', totalCount)
-  pagination = Math.ceil(totalCount / 5)
-  console.log(pagination)
-
   try {
-    if (
-      Object.keys(req.query).length > 0 &&
-      Object.values(req.query).every((value) => value !== '' && value !== null)
-    ) {
-      const features = new APIFeatures(Order.find(), req.query)
-        .filter()
-        .sort()
-        .limitFields()
-        .paginate()
-
-      orders = await features.query
-
-      console.log(orders)
-    } else {
-      orders = await Order.find({}).exec()
+    const { orderId, recipient, status, page } = req.query
+    const searchOrderId = orderId ? { _id: orderId } : []
+    const searchRecipient = recipient
+      ? { 'recipient.name': new RegExp(recipient) }
+      : {}
+    const searchStatus = status ? { status: +status } : {}
+    const searchParams = {
+      ...searchOrderId,
+      ...searchRecipient,
+      ...searchStatus,
     }
+    const pagination = Math.ceil((await Order.countDocuments(searchParams)) / 5)
+    const orders = await Order.find(searchParams)
+      .limit(5)
+      .skip((page - 1) * 5)
 
     if (!orders.length) {
       console.log('查無相關訂單')
