@@ -2,7 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/userController')
-const { isUser } = require('../middleware/auth')
+const { isUser, isAdmin } = require('../middleware/auth')
 
 router.get('/users', userController.getUserData)
 
@@ -29,4 +29,14 @@ router.post('/addPointsRecord', userController.addPointsRecord)
 
 // 取得本月最佳慈善捐款者
 router.get('/getBestDonator', userController.getBestDonator)
+
+// 取得所有用戶（admin）
+router.get('/allUsers', isAdmin, userController.getAllUsers)
+
+// 取得特定用戶（admin）
+router.get('/user/:id', isAdmin, userController.getUserByAdmin)
+
+// 取得特定用戶積分詳情（admin）
+router.get('/userPoints/:id', isAdmin, userController.getUserPointsByAdmin)
+
 module.exports = router
