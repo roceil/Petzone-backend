@@ -104,6 +104,7 @@ const getAllOrders = async (req, res) => {
     const orders = await Order.find(searchParams)
       .limit(5)
       .skip((page - 1) * 5)
+      .select('_id orderId createdAt totalPrice finalPrice recipient status')
 
     if (!orders.length) {
       console.log('查無相關訂單')

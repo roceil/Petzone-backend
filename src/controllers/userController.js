@@ -233,30 +233,25 @@ const getBestDonator = async (req, res) => {
 }
 
 const getAllUsers = async (req, res) => {
-  const page = parseInt(req.query.page, 10) || 1 // 預設為第1頁
-  const limit = 5 // 每頁顯示5個用戶
-  const skip = (page - 1) * limit // 計算跳過的用戶數量
-
   try {
-    // 查詢總用戶數以計算總頁數
-    const totalUsers = await User.countDocuments()
-    const totalPages = Math.ceil(totalUsers / limit)
-
-    // 檢查請求的頁數是否超出總頁數
-    if (page > totalPages) {
-      return res.status(400).json({ message: '查詢的頁數超過實際頁數' })
+    const { account, nickName, permission, page } = req.query
+    const searchAccount = account ? { account: new RegExp(account) } : []
+    const searchNickName = nickName ? { nickName: new RegExp(nickName) } : {}
+    const searchPermission = permission ? { permission } : {}
+    const searchParams = {
+      ...searchAccount,
+      ...searchNickName,
+      ...searchPermission,
     }
+    const totalPages = Math.ceil((await User.countDocuments(searchParams)) / 5)
+    const users = await User.find(searchParams)
+      .limit(5)
+      .skip((page - 1) * 5)
+      .select('_id account name nickName, permission')
 
-    // 使用 skip 和 limit 來實現分頁
-    const users = await User.find().skip(skip).limit(limit)
-
-    // 回傳用戶數據、當前頁碼、總頁數、以及每頁限制數量
     res.json({
       users,
-      totalUsers,
-      currentPage: page,
       totalPages,
-      limit,
     })
   } catch (error) {
     res.status(500).json({ message: 'something went wrong' })
