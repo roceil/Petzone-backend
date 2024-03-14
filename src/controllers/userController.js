@@ -247,7 +247,7 @@ const getAllUsers = async (req, res) => {
     const users = await User.find(searchParams)
       .limit(5)
       .skip((page - 1) * 5)
-      .select('_id account name nickName, permission')
+      .select('_id account name nickName permission')
 
     res.json({
       users,
