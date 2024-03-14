@@ -90,7 +90,7 @@ const getOrderByUserId = async (req, res) => {
 const getAllOrders = async (req, res) => {
   try {
     const { orderId, recipient, status, page } = req.query
-    const searchOrderId = orderId ? { _id: orderId } : []
+    const searchOrderId = orderId ? { orderId } : []
     const searchRecipient = recipient
       ? { 'recipient.email': new RegExp(recipient) }
       : {}
