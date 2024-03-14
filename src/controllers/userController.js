@@ -232,6 +232,61 @@ const getBestDonator = async (req, res) => {
   }
 }
 
+const getAllUsers = async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1 // 預設為第1頁
+  const limit = 5 // 每頁顯示5個用戶
+  const skip = (page - 1) * limit // 計算跳過的用戶數量
+
+  try {
+    // 查詢總用戶數以計算總頁數
+    const totalUsers = await User.countDocuments()
+    const totalPages = Math.ceil(totalUsers / limit)
+
+    // 檢查請求的頁數是否超出總頁數
+    if (page > totalPages) {
+      return res.status(400).json({ message: '查詢的頁數超過實際頁數' })
+    }
+
+    // 使用 skip 和 limit 來實現分頁
+    const users = await User.find().skip(skip).limit(limit)
+
+    // 回傳用戶數據、當前頁碼、總頁數、以及每頁限制數量
+    res.json({
+      users,
+      totalUsers,
+      currentPage: page,
+      totalPages,
+      limit,
+    })
+  } catch (error) {
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
+const getUserByAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(400).json({ message: '沒有匹配的用戶ID' })
+    }
+    res.json(user)
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+const getUserPointsByAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(400).json({ message: '沒有匹配的用戶ID' })
+    }
+    res.json(user.pointsRecord)
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 module.exports = {
   getUserData,
   getUsersInfo,
@@ -242,4 +297,7 @@ module.exports = {
   deleteAllUsers,
   addPointsRecord,
   getBestDonator,
+  getAllUsers,
+  getUserByAdmin,
+  getUserPointsByAdmin,
 }
