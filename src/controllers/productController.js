@@ -105,7 +105,6 @@ async function getProducts(req, res) {
   let pagination
 
   const totalCount = await Product.countDocuments()
-  console.log('Total count:', totalCount)
   pagination = Math.ceil(totalCount / 5)
   console.log(pagination)
 
@@ -116,7 +115,7 @@ async function getProducts(req, res) {
     ) {
       if (Object.keys(req.query)[0] === 'category') {
         products = await Product.find({
-          $or: [{ 'category.name': req.query.category }],
+          'category.name': req.query.category,
         }).exec()
       } else {
         const features = new APIFeatures(Product.find(), req.query)
@@ -127,9 +126,8 @@ async function getProducts(req, res) {
 
         products = await features.query
       }
+
       console.log(products)
-    } else {
-      products = await Product.find({}).exec()
     }
 
     if (!products.length) {
