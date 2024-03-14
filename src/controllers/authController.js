@@ -13,7 +13,6 @@ const handleSignIn = async (req, res) => {
         .json({ message: 'Email and password are required.' })
 
     const foundUser = await User.findOne({ account: email }).exec()
-    console.log('🚀 ~ foundUser:', foundUser)
 
     if (!foundUser) return res.sendStatus(401) // Unauthorized
 
@@ -41,8 +40,7 @@ const handleSignIn = async (req, res) => {
 
       // Saving refreshToken with current user
       foundUser.refreshToken = refreshToken
-      const result = await foundUser.save()
-      console.log('[Auth]', result)
+      await foundUser.save()
 
       res.cookie('accessToken', refreshToken, {
         httpOnly: true,
@@ -51,6 +49,16 @@ const handleSignIn = async (req, res) => {
       })
 
       //正式 回傳accessToken
+      // 判斷是不是管理者登入
+      if (foundUser.permission) {
+        res.json({
+          accessToken,
+          photo: foundUser.photo,
+          userId: foundUser._id,
+          permission: foundUser.permission,
+        })
+        return
+      }
       res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
 
       // res.redirect("/welcome");
