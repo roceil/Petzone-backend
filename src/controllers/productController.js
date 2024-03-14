@@ -100,35 +100,22 @@ async function userGetProduct(req, res) {
 
 // 後台取得全部產品資訊
 async function getProducts(req, res) {
-  console.log(req.query)
-  let products
-  let pagination
-
-  const totalCount = await Product.countDocuments()
-  pagination = Math.ceil(totalCount / 5)
-  console.log(pagination)
-
   try {
-    if (
-      Object.keys(req.query).length > 0 &&
-      Object.values(req.query).every((value) => value !== '' && value !== null)
-    ) {
-      if (Object.keys(req.query)[0] === 'category') {
-        products = await Product.find({
-          'category.name': req.query.category,
-        }).exec()
-      } else {
-        const features = new APIFeatures(Product.find(), req.query)
-          .filter()
-          .sort()
-          .limitFields()
-          .paginate()
-
-        products = await features.query
-      }
-
-      console.log(products)
+    const { name, category, isEnabled, page } = req.query
+    const searchName = name ? { name: new RegExp(name) } : {}
+    const searchCategory = category ? { 'category.name': category } : {}
+    const searchIsEnabled = isEnabled ? { isEnabled } : {}
+    const searchParams = {
+      ...searchName,
+      ...searchCategory,
+      ...searchIsEnabled,
     }
+    const pagination = Math.ceil(
+      (await Product.countDocuments(searchParams)) / 5
+    )
+    const products = await Product.find(searchParams)
+      .limit(5)
+      .skip((page - 1) * 5)
 
     if (!products.length) {
       console.log('查無相關商品')
