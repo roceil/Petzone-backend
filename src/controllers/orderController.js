@@ -92,7 +92,7 @@ const getAllOrders = async (req, res) => {
     const { orderId, recipient, status, page } = req.query
     const searchOrderId = orderId ? { _id: orderId } : []
     const searchRecipient = recipient
-      ? { 'recipient.name': new RegExp(recipient) }
+      ? { 'recipient.email': new RegExp(recipient) }
       : {}
     const searchStatus = status ? { status: +status } : {}
     const searchParams = {
