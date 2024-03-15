@@ -321,6 +321,54 @@ const getRandomPosts = async (req, res) => {
   }
 }
 
+const getAllPostsByAdmin = async (req, res) => {
+  try {
+    const { nickName, tag, page } = req.query
+    let searchNickName = {}
+    if (nickName) {
+      const users = await User.find({
+        nickName: { $regex: nickName, $options: 'i' },
+      })
+      const userIds = users.map((user) => user._id)
+      searchNickName = { user: { $in: userIds } }
+    }
+    let searchTag = {}
+    if (tag) {
+      searchTag = { tags: { $in: tag } }
+    }
+    const search = {
+      ...searchNickName,
+      ...searchTag,
+    }
+    const pagination = Math.ceil((await Post.countDocuments(search)) / 5)
+    const posts = await Post.find(search)
+      .populate({
+        path: 'user',
+        select: 'nickName',
+      })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .skip((page - 1) * 5)
+    const returnPosts = posts.map((post) => {
+      return {
+        _id: post._id,
+        user: post.user.nickName,
+        tags: post.tags,
+        likesLength: post.likes.length,
+        commentsLength: post.comments.length,
+        createdAt: post.createdAt,
+      }
+    })
+
+    res.json({
+      pagination,
+      posts: returnPosts,
+    })
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 module.exports = {
   getAllTags,
   getAllPosts,
@@ -336,4 +384,5 @@ module.exports = {
   updatePostComment,
   deletePostComment,
   getRandomPosts,
+  getAllPostsByAdmin,
 }

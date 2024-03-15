@@ -54,4 +54,7 @@ router.delete(
   postController.deletePostComment
 )
 
+// 取得所有貼文(後台)
+router.get('/posts/admin', isAdmin, postController.getAllPostsByAdmin)
+
 module.exports = router
