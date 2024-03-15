@@ -7,7 +7,7 @@ const { isUser } = require('../middleware/auth')
 // 新增訂單
 router.post('/order', orderController.createOrder)
 
-// 取得訂單 By Order ID
+// 前台、後台取得訂單 By Order ID
 router.get('/order/:id', orderController.getOrderByOrderId)
 
 // 會員取得訂單 By User ID

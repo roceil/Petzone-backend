@@ -54,7 +54,7 @@ const getOrderByOrderId = async (req, res) => {
       return res.status(400).json({ message: '找不到該筆訂單' })
     }
 
-    return res.status(200).send({ order: orderExist })
+    return res.status(200).send({ order: orderExist[0] })
   } catch (err) {
     return res.status(500).send({ message: err.message })
   }
