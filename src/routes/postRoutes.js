@@ -59,13 +59,16 @@ router.delete(
 // 取得所有貼文
 router.get('/admin/posts', isAdmin, postController.getAllPostsByAdmin)
 
+// 取得貼文 By ID
+router.get('/admin/post/:id', isAdmin, postController.getPostByAdmin)
+
 // 刪除貼文 By ID
-router.delete('admin/post/:id', isUser, postController.deletePostByAdmin)
+router.delete('/admin/post/:id', isAdmin, postController.deletePostByAdmin)
 
 // 刪除留言貼文
 router.delete(
   '/admin/post/:id/comment/:commentId',
-  isUser,
+  isAdmin,
   postController.deletePostCommentByAdmin
 )
 
