@@ -178,7 +178,7 @@ const createPostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    if (post.likes.find((item) => item.userId === userId)) {
+    if (post.likes.find((item) => item.user === userId)) {
       return res.status(400).json({ message: '已加入 likes 請用 put 更新' })
     }
     post.likes.push({
@@ -206,7 +206,7 @@ const updatePostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    let index = post.likes.findIndex((item) => item.userId === userId)
+    let index = post.likes.findIndex((item) => item.user === userId)
     if (index === -1) {
       return res.status(400).json({ message: '尚未加入 likes 請用 post 新增' })
     }
