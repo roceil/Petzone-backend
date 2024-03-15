@@ -55,7 +55,6 @@ const getPostById = async (req, res) => {
         path: 'comments.user',
         select: '_id nickName photo',
       })
-    console.log('post', post)
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
@@ -178,7 +177,7 @@ const createPostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    if (post.likes.find((item) => item.user === userId)) {
+    if (post.likes.find((item) => `${item.user}` === userId)) {
       return res.status(400).json({ message: '已加入 likes 請用 put 更新' })
     }
     post.likes.push({
@@ -206,7 +205,7 @@ const updatePostLike = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    let index = post.likes.findIndex((item) => item.user === userId)
+    let index = post.likes.findIndex((item) => `${item.user}` === userId)
     if (index === -1) {
       return res.status(400).json({ message: '尚未加入 likes 請用 post 新增' })
     }
@@ -293,7 +292,6 @@ const deletePostComment = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    console.log(commentId)
     const index = post.comments.findIndex((item) => `${item._id}` === commentId)
     if (index === -1) {
       return res.status(400).json({ message: '沒有匹配的留言ID' })
@@ -388,7 +386,6 @@ const getPostByAdmin = async (req, res) => {
 
     res.json(post)
   } catch (error) {
-    console.log(error)
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
 }
@@ -415,7 +412,6 @@ const deletePostCommentByAdmin = async (req, res) => {
     if (!post) {
       return res.status(400).json({ message: '沒有匹配的貼文ID' })
     }
-    console.log(commentId)
     const index = post.comments.findIndex((item) => `${item._id}` === commentId)
     if (index === -1) {
       return res.status(400).json({ message: '沒有匹配的留言ID' })
