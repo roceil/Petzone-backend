@@ -182,7 +182,7 @@ const createPostLike = async (req, res) => {
       return res.status(400).json({ message: '已加入 likes 請用 put 更新' })
     }
     post.likes.push({
-      userId,
+      user: userId,
       isLiked: true,
     })
     await post.save()
@@ -211,7 +211,7 @@ const updatePostLike = async (req, res) => {
       return res.status(400).json({ message: '尚未加入 likes 請用 post 新增' })
     }
     post.likes[index] = {
-      userId,
+      user: userId,
       isLiked,
     }
     await post.save()
@@ -367,6 +367,32 @@ const getAllPostsByAdmin = async (req, res) => {
   }
 }
 
+const getPostByAdmin = async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id)
+      .populate({
+        path: 'user',
+        select: 'nickName photo',
+      })
+      .populate({
+        path: 'comments.user',
+        select: '_id nickName photo',
+      })
+      .populate({
+        path: 'likes.user',
+        select: '_id as user nickName photo',
+      })
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+
+    res.json(post)
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
 const deletePostByAdmin = async (req, res) => {
   const { id } = req.params
   try {
@@ -418,6 +444,7 @@ module.exports = {
   deletePostComment,
   getRandomPosts,
   getAllPostsByAdmin,
+  getPostByAdmin,
   deletePostByAdmin,
   deletePostCommentByAdmin,
 }
