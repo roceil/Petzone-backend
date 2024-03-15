@@ -156,9 +156,6 @@ const updatePostById = async (req, res) => {
 
     const { tags, photos, content } = req.body
 
-    if (!content) {
-      res.status(400).json({ message: 'content 必填' })
-    }
     if (content.length > 255) {
       res.status(400).json({ message: 'content 最大長度為 255' })
     }
@@ -352,6 +349,7 @@ const getAllPostsByAdmin = async (req, res) => {
     const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
+        photo: post.photos[0],
         user: post.user.nickName,
         tags: post.tags,
         likesLength: post.likes.length,
@@ -364,6 +362,41 @@ const getAllPostsByAdmin = async (req, res) => {
       pagination,
       posts: returnPosts,
     })
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+const deletePostByAdmin = async (req, res) => {
+  const { id } = req.params
+  try {
+    const post = await Post.findById(id)
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+
+    await post.deleteOne()
+    res.json({ message: '刪除貼文成功' })
+  } catch (error) {
+    res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
+  }
+}
+
+const deletePostCommentByAdmin = async (req, res) => {
+  const { id, commentId } = req.params
+  try {
+    const post = await Post.findById(id)
+    if (!post) {
+      return res.status(400).json({ message: '沒有匹配的貼文ID' })
+    }
+    console.log(commentId)
+    const index = post.comments.findIndex((item) => `${item._id}` === commentId)
+    if (index === -1) {
+      return res.status(400).json({ message: '沒有匹配的留言ID' })
+    }
+    post.comments.splice(index, 1)
+    await post.save()
+    res.json({ message: '刪除留言成功' })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
@@ -385,4 +418,6 @@ module.exports = {
   deletePostComment,
   getRandomPosts,
   getAllPostsByAdmin,
+  deletePostByAdmin,
+  deletePostCommentByAdmin,
 }
