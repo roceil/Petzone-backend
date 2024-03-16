@@ -42,7 +42,7 @@ const handleSignIn = async (req, res) => {
       foundUser.refreshToken = refreshToken
       await foundUser.save()
 
-      res.cookie('accessToken', refreshToken, {
+      res.cookie('accessToken', accessToken, {
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000,
         // sameSite: "None",
