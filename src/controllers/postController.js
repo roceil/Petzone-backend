@@ -28,11 +28,11 @@ const getAllPosts = async (req, res) => {
       ...searchNickName,
       ...searchTag,
     }
-    const pagination = Math.ceil((await Post.countDocuments(search)) / 9)
+    const pagination = Math.ceil((await Post.countDocuments(search)) / 18)
     const posts = await Post.find(search)
       .sort({ createdAt: -1 })
-      .limit(9)
-      .skip((page - 1) * 9)
+      .limit(18)
+      .skip((page - 1) * 18)
     const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
