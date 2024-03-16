@@ -192,15 +192,28 @@ const handleCheckLoginSuccess = async (req, res) => {
         token: accessToken,
         user: req.user,
       })
-  } else if (req.cookies.userId) {
-    console.log(req.cookies)
-    const foundUser = await User.findOne({ _id: req.cookies.userId }).exec()
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith('Bearer')
+  ) {
+    let token = req.headers.authorization.split(' ')[1]
+    if (!token) {
+      res.status(403).json({ error: true, message: 'Not Authorized' })
+    }
+    const { UserInfo } = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+    const { userId } = UserInfo
+    const user = await User.findById(userId).exec()
+    if (!user) {
+      res.status(403).json({ error: true, message: 'Not Authorized' })
+    }
+    console.log(user)
+    // const foundUser = await User.findOne({ _id: req.userId })
     const expiryDate = new Date(Date.now() + 3600000) // 1 hour
     const accessToken = jwt.sign(
       {
         UserInfo: {
-          userId: req.cookies.userId,
-          username: foundUser.name,
+          userId: user._id,
+          username: user.name,
         },
       },
 
@@ -218,7 +231,7 @@ const handleCheckLoginSuccess = async (req, res) => {
         error: false,
         message: 'Successfully Logged In',
         token: accessToken,
-        user: { _id: req.cookies.userId, photo: req.cookies.userPhotoPath },
+        user: { _id: user._id, photo: user.photo },
       })
   } else {
     res.status(403).json({ error: true, message: 'Not Authorized' })
