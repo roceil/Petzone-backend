@@ -11,7 +11,7 @@ const getAllTags = async (req, res) => {
 
 const getAllPosts = async (req, res) => {
   try {
-    const { nickName, tag } = req.query
+    const { nickName, tag, page } = req.query
     let searchNickName = {}
     if (nickName) {
       const users = await User.find({
@@ -28,7 +28,11 @@ const getAllPosts = async (req, res) => {
       ...searchNickName,
       ...searchTag,
     }
-    const posts = await Post.find(search).sort({ createdAt: -1 })
+    const pagination = Math.ceil((await Post.countDocuments(search)) / 9)
+    const posts = await Post.find(search)
+      .sort({ createdAt: -1 })
+      .limit(9)
+      .skip((page - 1) * 9)
     const returnPosts = posts.map((post) => {
       return {
         _id: post._id,
@@ -38,7 +42,10 @@ const getAllPosts = async (req, res) => {
       }
     })
 
-    res.json(returnPosts)
+    res.json({
+      pagination,
+      posts: returnPosts,
+    })
   } catch (error) {
     res.status(500).json({ message: '請檢查API格式或參數是否有誤' })
   }
