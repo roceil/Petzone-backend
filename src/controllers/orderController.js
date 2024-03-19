@@ -1,8 +1,8 @@
 const Order = require('../models/order-model')
 const User = require('../models/user-model')
-const APIFeatures = require('../utils/apiFeatures')
 const { getTokenInfo } = require('../lib')
 
+// 自定義 OrderId
 function generateRandomNumber() {
   return Math.floor(100000 + Math.random() * 900000)
 }
@@ -86,7 +86,7 @@ const getOrderByUserId = async (req, res) => {
   }
 }
 
-// 後台取得全部訂單資訊
+// 後台取得所有訂單
 const getAllOrders = async (req, res) => {
   try {
     const { orderId, recipient, status, page } = req.query
@@ -125,9 +125,43 @@ const getAllOrders = async (req, res) => {
   }
 }
 
+// 後台修改訂單資料
+async function UpdateOrder(req, res) {
+  console.log(req.params, req.body)
+  const orderId = req.params.id
+  const recipient = req.body.recipient
+  const paymentType = parseInt(req.body.paymentType)
+
+  try {
+    const orderExist = await Order.findOne({ _id: orderId }).exec()
+
+    if (orderExist) {
+      Order.findOneAndUpdate(
+        { _id: orderId },
+        { $set: { recipient: recipient, paymentType: paymentType } },
+        { new: true }
+      )
+        .exec()
+        .then((updatedOrder) => {
+          if (updatedOrder) {
+            return res.status(200).send({ message: '更新訂單成功' })
+          }
+        })
+        .catch((error) => {
+          console.error('更新時出錯：', error.message)
+        })
+    } else {
+      return res.status(400).send({ message: '該訂單不存在' })
+    }
+  } catch (err) {
+    return res.status(500).send({ message: err.message })
+  }
+}
+
 module.exports = {
   createOrder,
   getAllOrders,
   getOrderByOrderId,
   getOrderByUserId,
+  UpdateOrder,
 }
