@@ -14,12 +14,17 @@ router.get(
     prompt: 'select_account',
   })
 )
+
 router.get(
   '/google/redirect',
   passport.authenticate('google', {
     failureRedirect: '/login/failed',
-    successRedirect: process.env.CLIENT_URL,
-  })
+  }),
+  function (req, res) {
+    console.log(req)
+    res.cookie('google', 'useGoogleLogin')
+    res.redirect(process.env.CLIENT_URL)
+  }
 )
 
 //一般註冊
@@ -27,9 +32,8 @@ router.post('/signup', authController.handleSignUp)
 
 // logout (adjust in future)
 router.get('/logout', authController.handleLogout, (req, res) => {
-  req.logOut((err) => {
+  req.logOut(() => {
     console.log('You logged out')
-    if (err) return res.send(err)
     return res.redirect(process.env.CLIENT_URL)
   })
 })
