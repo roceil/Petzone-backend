@@ -22,7 +22,7 @@ router.get(
   }),
   function (req, res) {
     console.log(req)
-    res.cookie('google', 'useGoogleLogin')
+    res.cookie('google', 'useGoogleLogin', { httpOnly: true })
     res.redirect(process.env.CLIENT_URL)
   }
 )
