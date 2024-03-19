@@ -16,6 +16,9 @@ router.get('/order/user/:id', isUser, orderController.getOrderByUserId)
 // 後台取得所有訂單
 router.get('/orders', orderController.getAllOrders)
 
+// 後台修改訂單資料
+router.put('/order/:id', orderController.UpdateOrder)
+
 // 更改訂單付款狀態
 // router.patch('/orders/:id/payment', orderController.updatePaymentStatus)
 

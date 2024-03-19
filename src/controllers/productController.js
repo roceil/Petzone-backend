@@ -1,6 +1,6 @@
 const Product = require('../models/product-model')
-const APIFeatures = require('../utils/apiFeatures')
 
+// 自定義 productId
 function generateRandomNumber() {
   return Math.floor(100000 + Math.random() * 900000)
 }
