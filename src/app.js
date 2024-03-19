@@ -29,7 +29,9 @@ const port = process.env.PORT || 3030
 // and fetch cookies credentials requirement
 app.use(credentials)
 
-app.use(cors(corsOptions))
+// app.use(cors(corsOptions))
+// ! 暫時允許所有來源
+app.use(cors())
 
 // built-in middleware to handle urlencoded data
 // "content-type: application/x-www-form-urlencoded"
