@@ -28,8 +28,8 @@ function category(name) {
 
 // 前台取得全部產品資訊
 async function userGetProducts(req, res) {
-  console.log(req.query)
-  console.log(Object.keys(req.query))
+  // console.log(req.query)
+  // console.log(Object.keys(req.query))
 
   // 分類搜尋
   if (Object.keys(req.query)[0] === 'category') {

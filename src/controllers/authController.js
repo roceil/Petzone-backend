@@ -48,7 +48,7 @@ const handleSignIn = async (req, res) => {
         // sameSite: "None",
       })
 
-      //正式 回傳accessToken
+      // 正式回傳accessToken
       // 判斷是不是管理者登入
       if (foundUser.permission) {
         res.json({
@@ -163,7 +163,7 @@ const handleLogout = async (req, res, next) => {
   res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
 }
 
-// google登入成功及檢查是否登入
+// google登入成功
 const handleCheckLoginSuccess = async (req, res) => {
   if (req.user) {
     console.log(req.user)
@@ -191,34 +191,6 @@ const handleCheckLoginSuccess = async (req, res) => {
         message: 'Successfully Logged In',
         token: accessToken,
         user: req.user,
-      })
-  } else if (req.cookies.userId) {
-    console.log(req.cookies)
-    const foundUser = await User.findOne({ _id: req.cookies.userId }).exec()
-    const expiryDate = new Date(Date.now() + 3600000) // 1 hour
-    const accessToken = jwt.sign(
-      {
-        UserInfo: {
-          userId: req.cookies.userId,
-          username: foundUser.name,
-        },
-      },
-
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '1d' }
-    )
-
-    res
-      .cookie('accessToken', accessToken, {
-        httpOnly: true,
-        expires: expiryDate,
-      })
-      .status(200)
-      .json({
-        error: false,
-        message: 'Successfully Logged In',
-        token: accessToken,
-        user: { _id: req.cookies.userId, photo: req.cookies.userPhotoPath },
       })
   } else {
     res.status(403).json({ error: true, message: 'Not Authorized' })
