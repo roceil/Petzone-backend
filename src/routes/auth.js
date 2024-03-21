@@ -22,10 +22,7 @@ router.get(
   }),
   function (req, res) {
     console.log(req)
-    res.cookie('google', 'useGoogleLogin', {
-      httpOnly: true,
-      domain: '.petzone.zeabur.app',
-    })
+    res.cookie('google', 'useGoogleLogin')
     res.redirect(process.env.CLIENT_URL)
   }
 )
