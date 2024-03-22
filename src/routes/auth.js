@@ -3,10 +3,13 @@ const router = express.Router()
 const passport = require('passport')
 const authController = require('../controllers/authController')
 
+// 一般註冊
+router.post('/signup', authController.handleSignUp)
+
 // 一般登入
 router.post('/signin', authController.handleSignIn)
 
-// google
+// google 登入
 router.get(
   '/google',
   passport.authenticate('google', {
@@ -22,26 +25,18 @@ router.get(
   }),
   function (req, res) {
     console.log(req)
-    res.cookie('google', 'useGoogleLogin')
+    res.cookie('userId', req.user.id, { httpOnly: true })
     res.redirect(process.env.CLIENT_URL)
   }
 )
 
-//一般註冊
-router.post('/signup', authController.handleSignUp)
+// handle google login and return user info
+router.get('/login/success', authController.handleCheckLogin)
 
-// logout (adjust in future)
-router.get('/logout', authController.handleLogout, (req, res) => {
-  req.logOut(() => {
-    console.log('You logged out')
-    return res.redirect(process.env.CLIENT_URL)
-  })
-})
-
-// check isUser login (adjust in future)
-router.get('/login/success', authController.handleCheckLoginSuccess)
-
-// handle login failed
+// handle google login failed
 router.get('/login/failed', authController.handleLoginFailed)
+
+// handle google logout
+router.get('/logout', authController.handleLogout)
 
 module.exports = router
