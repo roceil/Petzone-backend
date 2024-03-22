@@ -59,7 +59,10 @@ const handleSignIn = async (req, res) => {
         })
         return
       }
-      res.json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
+
+      res
+        .status(200)
+        .json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
 
       // res.redirect("/welcome");
     } else {
@@ -118,61 +121,31 @@ const handleSignUp = async (req, res) => {
   }
 }
 
-const handleLogout = async (req, res, next) => {
-  // On client, also delete the accessToken
-
-  // 假如用google登入就會有這個
-  if (req.user) {
-    return next()
-  }
-
+// google登入確認是否有connect_sid
+const handleCheckLogin = async (req, res) => {
   const cookies = req.cookies
-  console.log('🚀 ~ handleLogout ~ cookies:', cookies)
-  if (!cookies?.accessToken) {
-    return res.sendStatus(204) // No content to send back
-  }
-
-  const refreshToken = cookies.accessToken
-  console.log('🚀 ~ handleLogout ~ refreshToken:', refreshToken)
-
-  // Is refreshToken in db?
-  const foundUser = await User.findOne({ refreshToken }).exec()
-
-  if (!foundUser) {
-    res.clearCookie('accessToken', {
-      httpOnly: true,
-      sameSite: 'None',
-      secure: true,
-    })
+  console.log(cookies)
+  if (cookies['connect.sid']) {
+    handleCheckLoginSuccess(req, res)
+  } else {
     return res
-      .sendStatus(204)
-      .json({ status: 'success', message: 'Successfully logged out!' })
+      .status(200)
+      .header({ 'Access-Control-Allow-Origin': req.headers.origin })
+      .json({ message: 'Not Use Google Logged In' })
   }
-
-  // Delete refreshToken in db
-  foundUser.refreshToken = ''
-  const result = await foundUser.save()
-  console.log('[DELETE refreshToken]', result)
-
-  res.clearCookie('accessToken', {
-    httpOnly: true,
-    sameSite: 'None',
-    secure: true,
-  }) // secure:true - only serves on https
-
-  res.sendStatus(204).json({ error: false, message: 'Successfully Logout' })
 }
 
-// google登入成功
+// 認證google登入成功回傳資料
 const handleCheckLoginSuccess = async (req, res) => {
-  if (req.user) {
-    console.log(req.user)
-    const expiryDate = new Date(Date.now() + 3600000) // 1 hour
+  console.log(req.cookies['userId'])
+  const userId = req.cookies['userId']
+  if (userId) {
+    const foundUser = await User.findOne({ _id: userId }).exec()
     const accessToken = jwt.sign(
       {
         UserInfo: {
-          userId: req.user.id,
-          username: req.user.name,
+          userId: foundUser._id,
+          username: foundUser.name,
         },
       },
 
@@ -180,18 +153,16 @@ const handleCheckLoginSuccess = async (req, res) => {
       { expiresIn: '1d' }
     )
 
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      // sameSite: "None",
+    })
+
     res
-      .cookie('accessToken', accessToken, {
-        httpOnly: true,
-        expires: expiryDate,
-      })
       .status(200)
-      .json({
-        error: false,
-        message: 'Successfully Logged In',
-        token: accessToken,
-        user: req.user,
-      })
+      .header({ 'Access-Control-Allow-Origin': req.headers.origin })
+      .json({ accessToken, photo: foundUser.photo, userId: foundUser._id })
   } else {
     res.status(403).json({ error: true, message: 'Not Authorized' })
   }
@@ -204,10 +175,42 @@ const handleLoginFailed = (req, res) => {
   })
 }
 
+// google登出
+const handleLogout = async (req, res) => {
+  // delete the connect_sid and accessToken
+  const cookies = req.cookies
+  console.log('🚀 ~ handleLogout ~ cookies:', cookies)
+  if (cookies['connect.sid']) {
+    // const refreshToken = cookies.accessToken
+    // console.log('🚀 ~ handleLogout ~ refreshToken:', refreshToken)
+
+    // Is refreshToken in db?
+    // const foundUser = await User.findOne({ refreshToken }).exec()
+
+    // Delete refreshToken in db
+    // foundUser.refreshToken = ''
+    // const result = await foundUser.save()
+    // console.log('[DELETE refreshToken]', result)
+
+    res.clearCookie('connect.sid', { httpOnly: true })
+    res.clearCookie('accessToken', { httpOnly: true })
+    res.clearCookie('userId', { httpOnly: true })
+    res
+      .status(200)
+      .header({ 'Access-Control-Allow-Origin': req.headers.origin })
+      .json({ message: 'Not Use Google Logged In' })
+  } else {
+    return res
+      .status(200)
+      .header({ 'Access-Control-Allow-Origin': req.headers.origin })
+      .json({ message: 'Not Use Google Logged In' })
+  }
+}
 module.exports = {
   handleSignIn,
   handleSignUp,
-  handleLogout,
+  handleCheckLogin,
   handleCheckLoginSuccess,
   handleLoginFailed,
+  handleLogout,
 }
