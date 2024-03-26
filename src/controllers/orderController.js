@@ -158,10 +158,76 @@ async function UpdateOrder(req, res) {
   }
 }
 
+// 後台修改訂單狀態
+async function UpdateOrderStatus(req, res) {
+  console.log(req.params, req.body)
+  const orderId = req.params.id
+  const status = req.body.status
+
+  try {
+    const orderExist = await Order.findOne({ _id: orderId }).exec()
+
+    if (orderExist && orderExist.recipient.userId !== null && status === 3) {
+      Order.findOneAndUpdate(
+        { _id: orderId },
+        { $set: { status: status } },
+        { new: true }
+      ).exec()
+
+      const userId = orderExist.recipient.userId
+      const currentUser = await User.findById({ _id: userId })
+      let getPoints = Math.round((orderExist.totalPrice * 10) / 100)
+      if (orderExist.finalPrice) {
+        getPoints = Math.round((orderExist.finalPrice * 10) / 100)
+      }
+
+      currentUser.pointsRecord.push({
+        changePoints: getPoints,
+        reason: 4,
+        beforePoints: currentUser.points || 0,
+        afterPoints: currentUser.points + getPoints,
+        createAt: new Date(),
+      })
+      currentUser.points += getPoints
+
+      await currentUser
+        .save()
+        .then((updatedOrder) => {
+          if (updatedOrder) {
+            return res.status(200).send({ message: '更新訂單成功' })
+          }
+        })
+        .catch((error) => {
+          console.error('更新時出錯：', error.message)
+        })
+    } else if (orderExist) {
+      Order.findOneAndUpdate(
+        { _id: orderId },
+        { $set: { status: status } },
+        { new: true }
+      )
+        .exec()
+        .then((updatedOrder) => {
+          if (updatedOrder) {
+            return res.status(200).send({ message: '更新訂單成功' })
+          }
+        })
+        .catch((error) => {
+          console.error('更新時出錯：', error.message)
+        })
+    } else {
+      return res.status(400).send({ message: '該訂單不存在' })
+    }
+  } catch (err) {
+    return res.status(500).send({ message: err.message })
+  }
+}
+
 module.exports = {
   createOrder,
   getAllOrders,
   getOrderByOrderId,
   getOrderByUserId,
   UpdateOrder,
+  UpdateOrderStatus,
 }

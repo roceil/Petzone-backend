@@ -116,8 +116,9 @@ async function getProducts(req, res) {
     const products = await Product.find(searchParams)
       .limit(5)
       .skip((page - 1) * 5)
-      .select('_id productId name category price quantity isEnabled')
-
+      .select(
+        '_id productId name category price originPrice quantity isEnabled'
+      )
     if (!products.length) {
       console.log('查無相關商品')
       return res.status(200).send({

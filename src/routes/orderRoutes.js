@@ -19,7 +19,7 @@ router.get('/orders', orderController.getAllOrders)
 // 後台修改訂單資料
 router.put('/order/:id', orderController.UpdateOrder)
 
-// 更改訂單付款狀態
-// router.patch('/orders/:id/payment', orderController.updatePaymentStatus)
+// 後台修改訂單狀態
+router.put('/order/:id/status', orderController.UpdateOrderStatus)
 
 module.exports = router
