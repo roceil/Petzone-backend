@@ -235,9 +235,15 @@ const getBestDonator = async (req, res) => {
 const getAllUsers = async (req, res) => {
   try {
     const { account, nickName, permission, page } = req.query
-    const searchAccount = account ? { account: new RegExp(account) } : []
+    const searchAccount = account ? { account: new RegExp(account) } : {}
     const searchNickName = nickName ? { nickName: new RegExp(nickName) } : {}
-    const searchPermission = permission ? { permission } : {}
+    const searchPermission =
+      permission === 'user'
+        ? { permission: { $ne: 'admin' } }
+        : permission
+        ? { permission }
+        : {}
+
     const searchParams = {
       ...searchAccount,
       ...searchNickName,
@@ -282,6 +288,39 @@ const getUserPointsByAdmin = async (req, res) => {
   }
 }
 
+const deleteUserByAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(400).json({ message: '沒有匹配的用戶ID' })
+    }
+
+    await user.deleteOne()
+    res.json({ message: '刪除用戶成功' })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
+const updateUserPermissionByAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user) {
+      return res.status(400).json({ message: '沒有匹配的用戶ID' })
+    }
+
+    user.permission = req.body.permission
+
+    await user.save()
+    res.json(user)
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: 'something went wrong' })
+  }
+}
+
+
 module.exports = {
   getUserData,
   getUsersInfo,
@@ -295,4 +334,6 @@ module.exports = {
   getAllUsers,
   getUserByAdmin,
   getUserPointsByAdmin,
+  deleteUserByAdmin,
+  updateUserPermissionByAdmin,
 }
