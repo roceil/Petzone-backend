@@ -39,4 +39,10 @@ router.get('/user/:id', isAdmin, userController.getUserByAdmin)
 // 取得特定用戶積分詳情（admin）
 router.get('/userPoints/:id', isAdmin, userController.getUserPointsByAdmin)
 
+// 刪除特定用戶（admin）
+router.delete('/user/:id', isAdmin, userController.deleteUserByAdmin)
+
+// 更改特定用戶權限（admin）
+router.patch('/user/:id', isAdmin, userController.updateUserPermissionByAdmin)
+
 module.exports = router
